@@ -30,7 +30,7 @@ export function StayUpdatedButton({
       </Button>
       {showPlaceholder ? (
         <p className="type-body-md max-w-xs text-moloch-800/70" role="status">
-          Email preferences arrive in the next PR.
+          Email preferences are coming soon.
         </p>
       ) : null}
     </div>

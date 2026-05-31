@@ -44,21 +44,21 @@ function HeroSection() {
           <p className="animate-forge-rise type-label-sm mb-5 text-moloch-500">
             RaidGuild Forge
           </p>
-          <h1 className="animate-forge-rise delay-100 max-w-4xl font-display text-[clamp(2.3rem,10vw,5rem)] font-bold leading-[1.08] tracking-[0]">
+          <h1 className="animate-forge-rise anim-delay-100 max-w-4xl font-display text-[clamp(2.3rem,10vw,5rem)] font-bold leading-[1.08] tracking-[0]">
             Forge <br className="md:hidden" />
             Autonomous <br className="md:hidden" />
             Worlds With <br className="md:hidden" />
             Real Machines
           </h1>
-          <p className="animate-forge-rise delay-200 type-heading-md mt-6 max-w-2xl text-moloch-800/85">
+          <p className="animate-forge-rise anim-delay-200 type-heading-md mt-6 max-w-2xl text-moloch-800/85">
             Where makerspace and gaming meet.
           </p>
-          <p className="animate-forge-rise delay-300 type-body-lg mt-6 max-w-2xl text-moloch-800/78">
+          <p className="animate-forge-rise anim-delay-300 type-body-lg mt-6 max-w-2xl text-moloch-800/78">
             RaidGuild Forge builds games and tools where players design useful
             machines, test them through physics, and earn from their work when
             others build on it.
           </p>
-          <div className="animate-forge-rise delay-400 mt-8 flex flex-col gap-3 sm:flex-row sm:items-start">
+          <div className="animate-forge-rise anim-delay-400 mt-8 flex flex-col gap-3 sm:flex-row sm:items-start">
             <StayUpdatedButton location="hero" />
             <Button asChild variant="secondary">
               <Link href="/games">Explore games</Link>
@@ -194,7 +194,7 @@ function FeaturedProjectsSection() {
                 eventProperties={{ project: project.title, location: "featured_games" }}
                 className="group border border-moloch-800/15 bg-scroll-100 transition-[box-shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[5px_5px_0_rgba(189,72,45,0.14)]"
                 target={isExternal ? "_blank" : undefined}
-                rel={isExternal ? "noreferrer" : undefined}
+                rel={isExternal ? "noopener noreferrer" : undefined}
               >
                 {content}
               </TrackLink>
@@ -273,7 +273,7 @@ function LearnSection() {
                 eventProperties={{ article: item.title, location: "learn_preview" }}
                 className="group grid overflow-hidden border border-moloch-800/15 bg-scroll-100 transition-[background-color,box-shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:bg-neutral-100 hover:shadow-[5px_5px_0_rgba(41,16,10,0.08)] md:grid-cols-[0.8fr_1fr]"
                 target={isExternal ? "_blank" : undefined}
-                rel={isExternal ? "noreferrer" : undefined}
+                rel={isExternal ? "noopener noreferrer" : undefined}
               >
                 <div className="relative min-h-64 border-b border-moloch-800/15 md:border-b-0 md:border-r">
                   <Image

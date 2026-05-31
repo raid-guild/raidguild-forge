@@ -180,19 +180,19 @@ a {
     filter: saturate(1.12);
   }
 
-  .delay-100 {
+  .anim-delay-100 {
     animation-delay: 100ms;
   }
 
-  .delay-200 {
+  .anim-delay-200 {
     animation-delay: 200ms;
   }
 
-  .delay-300 {
+  .anim-delay-300 {
     animation-delay: 300ms;
   }
 
-  .delay-400 {
+  .anim-delay-400 {
     animation-delay: 400ms;
   }
 
@@ -280,9 +280,12 @@ a {
   @media (prefers-reduced-motion: reduce) {
     .animate-forge-drift,
     .animate-forge-rise,
-    .project-card-media {
+    .project-card-media,
+    .group:hover .project-card-media {
       animation: none;
       transform: none;
+      filter: none;
+      will-change: auto;
     }
 
     *,

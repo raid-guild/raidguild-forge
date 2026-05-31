@@ -100,7 +100,7 @@ Debrief topics:
 - Exact status language
 - Whether each game gets a detail page in v1
 - DAO: The Game positioning
-- Not-currently-active project tone
+- Not currently active project tone
 
 ## PR 5: Learn Page
 
@@ -128,7 +128,7 @@ Build the Marketplace preview page.
 
 Planned scope:
 
-- Explanation of components, machines, physical kits, licenses as the purchase/access model, and designs
+- Explanation of Components, Machines, and Physical Kits, with licenses as the purchase/access model
 - Marketplace interest CTA with Marketplace preselected
 - Sample marketplace objects if useful
 - Analytics for marketplace intent

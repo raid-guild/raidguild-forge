@@ -3,11 +3,11 @@
 import Link from "next/link";
 import type { ComponentProps } from "react";
 
-import { analyticsEvents, trackEvent } from "@/lib/analytics";
+import { analyticsEvents, trackEvent, type EventProperties } from "@/lib/analytics";
 
 type TrackLinkProps = ComponentProps<typeof Link> & {
   eventName: (typeof analyticsEvents)[keyof typeof analyticsEvents];
-  eventProperties?: Record<string, string | number | boolean | null>;
+  eventProperties?: EventProperties;
 };
 
 export function TrackLink({

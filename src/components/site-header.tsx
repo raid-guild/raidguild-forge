@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { TrackLink } from "@/components/track-link";
+import { analyticsEvents } from "@/lib/analytics";
 import { siteConfig } from "@/lib/site";
 
 export function SiteHeader() {
@@ -19,13 +21,15 @@ export function SiteHeader() {
         </Link>
         <nav aria-label="Primary navigation" className="hidden items-center gap-6 md:flex">
           {siteConfig.nav.map((item) => (
-            <Link
+            <TrackLink
               key={item.href}
               href={item.href}
+              eventName={analyticsEvents.navClick}
+              eventProperties={{ target: item.href, location: "desktop_header" }}
               className="type-label-sm text-moloch-800/80 transition-colors hover:text-moloch-500"
             >
               {item.label}
-            </Link>
+            </TrackLink>
           ))}
         </nav>
       </div>
@@ -34,16 +38,18 @@ export function SiteHeader() {
         className="container-custom grid grid-cols-4 gap-2 border-t border-moloch-800/10 py-3 md:hidden"
       >
         {siteConfig.nav.map((item) => (
-          <Link
+          <TrackLink
             key={item.href}
             href={item.href}
+            eventName={analyticsEvents.navClick}
+            eventProperties={{ target: item.href, location: "mobile_header" }}
             className="type-label-sm text-center text-moloch-800/80 transition-colors hover:text-moloch-500"
           >
             <span className="sm:hidden">
               {item.label === "Marketplace" ? "Market" : item.label}
             </span>
             <span className="hidden sm:inline">{item.label}</span>
-          </Link>
+          </TrackLink>
         ))}
       </nav>
     </header>
