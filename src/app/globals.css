@@ -156,6 +156,26 @@ a {
     }
   }
 
+  @keyframes subscribe-overlay-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes subscribe-dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(18px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
   .animate-forge-drift {
     animation: forge-drift 24s ease-in-out infinite;
     transform-origin: 70% 55%;
@@ -164,6 +184,14 @@ a {
 
   .animate-forge-rise {
     animation: forge-rise 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .subscribe-overlay {
+    animation: subscribe-overlay-in 180ms ease-out both;
+  }
+
+  .subscribe-dialog {
+    animation: subscribe-dialog-in 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .project-card-media {
@@ -280,6 +308,8 @@ a {
   @media (prefers-reduced-motion: reduce) {
     .animate-forge-drift,
     .animate-forge-rise,
+    .subscribe-overlay,
+    .subscribe-dialog,
     .project-card-media,
     .group:hover .project-card-media {
       animation: none;

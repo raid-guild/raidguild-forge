@@ -13,8 +13,13 @@ export const analyticsEvents = {
   stayUpdatedClick: "cta_stay_updated_click",
   projectClick: "project_card_click",
   learnClick: "learn_preview_click",
-  marketplaceClick: "marketplace_interest_click",
   navClick: "nav_click",
+  subscribeConfirm: "subscribe_confirm",
+  subscribeError: "subscribe_error",
+  subscribePreferenceClick: "subscribe_preference_click",
+  subscribeSubmit: "subscribe_submit",
+  subscribeSuccess: "subscribe_success",
+  subscribeUnsubscribe: "subscribe_unsubscribe",
 } as const;
 
 export function trackEvent(

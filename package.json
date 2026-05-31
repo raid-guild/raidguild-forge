@@ -5,17 +5,22 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:reset": "scripts/reset-local-db.sh",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-slot": "latest",
+    "@sendgrid/mail": "^8.1.6",
     "@vercel/analytics": "latest",
     "class-variance-authority": "latest",
     "clsx": "latest",
     "lucide-react": "latest",
     "next": "latest",
+    "pg": "^8.21.0",
     "react": "latest",
     "react-dom": "latest",
     "tailwind-merge": "latest"
@@ -23,6 +28,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "latest",
     "@types/node": "latest",
+    "@types/pg": "^8.20.0",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "eslint": "^9.0.0",

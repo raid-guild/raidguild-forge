@@ -1,0 +1,144 @@
+import { query } from "@/lib/subscribe/db";
+import {
+  createEmailHash,
+  hashConfirmationToken,
+  normalizeEmail,
+} from "@/lib/subscribe/crypto";
+import type { SubscriberPreferences } from "@/lib/subscribe/preferences";
+
+type SubscriberRow = {
+  id: string;
+  verified_at: string | null;
+};
+
+type ConfirmationRow = {
+  subscriber_id: string;
+};
+
+export async function upsertSubscriber({
+  email,
+  preferences,
+  source,
+  unsubscribeToken,
+}: {
+  email: string;
+  preferences: SubscriberPreferences;
+  source?: string;
+  unsubscribeToken: string;
+}) {
+  const normalizedEmail = normalizeEmail(email);
+  const emailHash = createEmailHash(normalizedEmail);
+  const unsubscribeTokenHash = hashConfirmationToken(unsubscribeToken);
+
+  const subscriberResult = await query<SubscriberRow>(
+    `
+      insert into subscribers (
+        email,
+        email_hash,
+        unsubscribe_token_hash,
+        source,
+        unsubscribed_at,
+        updated_at
+      )
+      values ($1, $2, $3, $4, null, now())
+      on conflict (email) do update
+      set unsubscribe_token_hash = excluded.unsubscribe_token_hash,
+          source = coalesce(excluded.source, subscribers.source),
+          unsubscribed_at = null,
+          updated_at = now()
+      returning id, verified_at
+    `,
+    [normalizedEmail, emailHash, unsubscribeTokenHash, source ?? null],
+  );
+
+  const subscriber = subscriberResult.rows[0];
+
+  await query(
+    `
+      insert into subscriber_preferences (subscriber_id, learn, games, marketplace, updated_at)
+      values ($1, $2, $3, $4, now())
+      on conflict (subscriber_id) do update
+      set learn = excluded.learn,
+          games = excluded.games,
+          marketplace = excluded.marketplace,
+          updated_at = now()
+    `,
+    [subscriber.id, preferences.learn, preferences.games, preferences.marketplace],
+  );
+
+  return {
+    id: subscriber.id,
+    verifiedAt: subscriber.verified_at,
+    email: normalizedEmail,
+  };
+}
+
+export async function createConfirmation({
+  subscriberId,
+  token,
+}: {
+  subscriberId: string;
+  token: string;
+}) {
+  const tokenHash = hashConfirmationToken(token);
+
+  await query(
+    `
+      insert into email_confirmations (subscriber_id, token_hash, expires_at)
+      values ($1, $2, now() + interval '7 days')
+    `,
+    [subscriberId, tokenHash],
+  );
+}
+
+export async function confirmSubscriber(token: string) {
+  const tokenHash = hashConfirmationToken(token);
+
+  const confirmationResult = await query<ConfirmationRow>(
+    `
+      update email_confirmations
+      set confirmed_at = now()
+      where token_hash = $1
+        and confirmed_at is null
+        and expires_at > now()
+      returning subscriber_id
+    `,
+    [tokenHash],
+  );
+
+  const confirmation = confirmationResult.rows[0];
+
+  if (!confirmation) {
+    return false;
+  }
+
+  await query(
+    `
+      update subscribers
+      set verified_at = coalesce(verified_at, now()),
+          updated_at = now()
+      where id = $1
+    `,
+    [confirmation.subscriber_id],
+  );
+
+  return true;
+}
+
+export async function unsubscribeSubscriber(token: string) {
+  const tokenHash = hashConfirmationToken(token);
+
+  const result = await query<{ id: string }>(
+    `
+      update subscribers
+      set unsubscribed_at = now(),
+          updated_at = now()
+      where unsubscribe_token_hash = $1
+        and unsubscribed_at is null
+      returning id
+    `,
+    [tokenHash],
+  );
+
+  return result.rows.length > 0;
+}
