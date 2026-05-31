@@ -90,7 +90,7 @@ Initial projects:
 
 Planned scope:
 
-- Status labels such as Concept, Alpha since June 2025 / paused, and Demo released / archived
+- Status labels such as Concept, Playable alpha / not currently active, and Playable demo / not currently active
 - Project cards and/or detail pages
 - Links to playable demos where available
 - Analytics for filters, project opens, and external play links
@@ -100,7 +100,7 @@ Debrief topics:
 - Exact status language
 - Whether each game gets a detail page in v1
 - DAO: The Game positioning
-- Archived/paused project tone
+- Not-currently-active project tone
 
 ## PR 5: Learn Page
 
@@ -128,7 +128,7 @@ Build the Marketplace preview page.
 
 Planned scope:
 
-- Explanation of components, machines, licenses, kits, and designs
+- Explanation of components, machines, physical kits, licenses as the purchase/access model, and designs
 - Marketplace interest CTA with Marketplace preselected
 - Sample marketplace objects if useful
 - Analytics for marketplace intent
@@ -138,6 +138,7 @@ Debrief topics:
 - How real vs speculative the marketplace should feel
 - Language around royalties, rewards, and licensing
 - What marketplace objects exist in v1
+- x402 purchase flow, wallet connection, and filtering by game
 
 ## PR 7: Analytics, SEO, QA Polish
 

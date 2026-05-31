@@ -101,7 +101,10 @@
     "Liberation Mono", "Courier New", monospace;
 }
 
-* {
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   border-color: var(--border);
 }
 
@@ -130,6 +133,69 @@ a {
 }
 
 @layer utilities {
+  @keyframes forge-drift {
+    0% {
+      transform: scale(1.02) translate3d(0, 0, 0);
+    }
+    50% {
+      transform: scale(1.07) translate3d(-1.5%, 1%, 0);
+    }
+    100% {
+      transform: scale(1.02) translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes forge-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-forge-drift {
+    animation: forge-drift 24s ease-in-out infinite;
+    transform-origin: 70% 55%;
+    will-change: transform;
+  }
+
+  .animate-forge-rise {
+    animation: forge-rise 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .project-card-media {
+    transform: scale(1);
+    filter: saturate(1);
+    transition:
+      transform 900ms cubic-bezier(0.16, 1, 0.3, 1),
+      filter 900ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, filter;
+  }
+
+  .group:hover .project-card-media {
+    transform: scale(1.045);
+    filter: saturate(1.12);
+  }
+
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+
   .container-custom {
     width: 100%;
     max-width: 80rem;
@@ -208,6 +274,24 @@ a {
   @media (min-width: 1024px) {
     .grid-custom {
       grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-forge-drift,
+    .animate-forge-rise,
+    .project-card-media {
+      animation: none;
+      transform: none;
+    }
+
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 1ms !important;
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
     }
   }
 }

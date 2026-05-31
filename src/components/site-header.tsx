@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/site";
 
 export function SiteHeader() {
   return (
-    <header className="border-b border-moloch-800/15">
+    <header className="sticky top-0 z-50 border-b border-moloch-800/15 bg-scroll-100/94 backdrop-blur">
       <div className="container-custom flex h-20 items-center justify-between gap-8">
         <Link href="/" className="flex items-center gap-3" aria-label="RaidGuild Forge home">
           <Image
@@ -31,15 +31,18 @@ export function SiteHeader() {
       </div>
       <nav
         aria-label="Mobile primary navigation"
-        className="container-custom flex gap-5 overflow-x-auto border-t border-moloch-800/10 py-3 md:hidden"
+        className="container-custom grid grid-cols-4 gap-2 border-t border-moloch-800/10 py-3 md:hidden"
       >
         {siteConfig.nav.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="type-label-sm shrink-0 text-moloch-800/80 transition-colors hover:text-moloch-500"
+            className="type-label-sm text-center text-moloch-800/80 transition-colors hover:text-moloch-500"
           >
-            {item.label}
+            <span className="sm:hidden">
+              {item.label === "Marketplace" ? "Market" : item.label}
+            </span>
+            <span className="hidden sm:inline">{item.label}</span>
           </Link>
         ))}
       </nav>

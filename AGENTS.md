@@ -66,6 +66,14 @@ For homepage-level copy, prefer "Player" over "Battler" unless a specific game n
 - Games: project catalogue with status/date/context
 - Marketplace: components, machines, licenses, kits, designs, and future marketplace activity
 
+Marketplace direction:
+
+- Catalogue items are Components, Machines, and Physical Kits.
+- Purchases grant access through licenses rather than treating "Licenses" as a standalone catalogue category.
+- Marketplace purchases are expected to use x402.
+- The marketplace will eventually need wallet connection.
+- Marketplace browsing should support filtering by game.
+
 ## Brand System
 
 Use RaidGuild's official brand system as the source of truth:
