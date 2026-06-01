@@ -11,6 +11,8 @@ export type EventProperties = Record<string, string | number | boolean | null>;
 
 export const analyticsEvents = {
   stayUpdatedClick: "cta_stay_updated_click",
+  gameExternalClick: "game_external_click",
+  gameFilterChange: "game_filter_change",
   projectClick: "project_card_click",
   learnClick: "learn_preview_click",
   navClick: "nav_click",

@@ -64,22 +64,22 @@ export const featuredGames: Project[] = [
     cta: "View game direction",
   },
   {
-    title: "Auto Tower Defense",
-    status: "Playable alpha / not currently active",
-    description:
-      "An early tower-defense auto battler experiment around patented components, async saved battles, and royalty splits.",
-    image: "/assets/projects/auto-tower-defense.jpg",
-    href: "/games",
-    cta: "View status",
-  },
-  {
     title: "DAO: The Game",
-    status: "Playable demo / not currently active",
+    status: "Playable demo / complete",
     description:
       "A short playable management demo about accidental contracts, improvised organizations, and shipping under pressure.",
     image: "/assets/projects/dao-the-game-card.png",
     href: "https://www.daothegame.com/",
     cta: "Play demo",
+  },
+  {
+    title: "Auto Tower Defense",
+    status: "Alpha released / not currently active",
+    description:
+      "An early tower-defense auto battler experiment around patented components, async saved battles, and royalty splits.",
+    image: "/assets/projects/auto-tower-defense.jpg",
+    href: "/games",
+    cta: "View status",
   },
 ];
 
