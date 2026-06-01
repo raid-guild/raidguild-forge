@@ -127,6 +127,7 @@ The stay-updated CTA should eventually open a form with:
 Likely stack:
 
 - Neon for subscriber/preferences storage
+- Local Postgres via the same `DATABASE_URL` contract for development
 - Vercel serverless routes for signup/confirmation
 - SendGrid for confirmation and future emails
 - Vercel Analytics for anonymous interaction events
