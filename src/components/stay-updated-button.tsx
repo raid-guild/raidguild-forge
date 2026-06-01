@@ -54,12 +54,16 @@ export function StayUpdatedButton({
 
   const closeModal = useCallback(() => {
     setIsVisible(false);
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current);
+    }
     closeTimerRef.current = window.setTimeout(() => {
       setIsOpen(false);
       setStatus("idle");
       setMessage("");
       setEmail("");
       setPreferences({ ...startingPreferences });
+      closeTimerRef.current = undefined;
     }, 220);
   }, [startingPreferences]);
 
