@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import {
   useEffect,
   useId,
+  useCallback,
   useMemo,
   useRef,
   useState,
@@ -13,11 +14,15 @@ import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
 import { analyticsEvents, trackEvent } from "@/lib/analytics";
-import { defaultSubscriberPreferences } from "@/lib/subscribe/preferences";
+import {
+  defaultSubscriberPreferences,
+  type SubscriberPreferences,
+} from "@/lib/subscribe/preferences";
 
 type StayUpdatedButtonProps = {
   location: string;
   variant?: "primary" | "secondary" | "ghost";
+  initialPreferences?: SubscriberPreferences;
 };
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
@@ -31,12 +36,14 @@ const preferenceLabels = {
 export function StayUpdatedButton({
   location,
   variant = "primary",
+  initialPreferences,
 }: StayUpdatedButtonProps) {
   const formId = useId();
+  const startingPreferences = initialPreferences ?? defaultSubscriberPreferences;
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState("");
-  const [preferences, setPreferences] = useState(defaultSubscriberPreferences);
+  const [preferences, setPreferences] = useState(() => ({ ...startingPreferences }));
   const [status, setStatus] = useState<FormStatus>("idle");
   const [message, setMessage] = useState("");
   const closeTimerRef = useRef<number | undefined>(undefined);
@@ -44,6 +51,21 @@ export function StayUpdatedButton({
     () => preferences.learn && preferences.games && preferences.marketplace,
     [preferences],
   );
+
+  const closeModal = useCallback(() => {
+    setIsVisible(false);
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current);
+    }
+    closeTimerRef.current = window.setTimeout(() => {
+      setIsOpen(false);
+      setStatus("idle");
+      setMessage("");
+      setEmail("");
+      setPreferences({ ...startingPreferences });
+      closeTimerRef.current = undefined;
+    }, 220);
+  }, [startingPreferences]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -65,7 +87,7 @@ export function StayUpdatedButton({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen]);
+  }, [closeModal, isOpen]);
 
   useEffect(() => {
     return () => {
@@ -82,17 +104,6 @@ export function StayUpdatedButton({
     }
     setIsOpen(true);
     window.requestAnimationFrame(() => setIsVisible(true));
-  }
-
-  function closeModal() {
-    setIsVisible(false);
-    closeTimerRef.current = window.setTimeout(() => {
-      setIsOpen(false);
-      setStatus("idle");
-      setMessage("");
-      setEmail("");
-      setPreferences(defaultSubscriberPreferences);
-    }, 220);
   }
 
   function toggleAll(checked: boolean) {

@@ -129,14 +129,15 @@ Planned scope:
 
 - Explanation of Components, Machines, and Physical Kits, with licenses as the purchase/access model
 - Marketplace interest CTA with Marketplace preselected
-- Sample marketplace objects if useful
-- Analytics for marketplace intent
+- Conceptual marketplace direction without sample objects
+- x402 and wallet connection framed as future marketplace infrastructure
+- Analytics through the Marketplace stay-updated CTA
 
 Debrief topics:
 
 - How real vs speculative the marketplace should feel
 - Language around royalties, rewards, and licensing
-- What marketplace objects exist in v1
+- Whether to include placeholder objects before real catalogue items exist
 - x402 purchase flow, wallet connection, and filtering by game
 
 ## PR 7: Analytics, SEO, QA Polish
