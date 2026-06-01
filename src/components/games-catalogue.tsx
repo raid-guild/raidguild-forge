@@ -30,6 +30,10 @@ export function GamesCatalogue() {
   );
 
   function selectActivity(nextActivity: ActivityFilter) {
+    if (nextActivity === activity) {
+      return;
+    }
+
     setActivity(nextActivity);
     trackEvent(analyticsEvents.gameFilterChange, {
       filter: "activity",
@@ -55,6 +59,7 @@ export function GamesCatalogue() {
                   ? "border-moloch-500 bg-moloch-500 text-scroll-100"
                   : "border-moloch-800/18 bg-scroll-100 text-moloch-800/75 hover:border-moloch-500 hover:text-moloch-500",
               )}
+              aria-pressed={activity === option}
               onClick={() => selectActivity(option)}
             >
               {activityLabels[option]}

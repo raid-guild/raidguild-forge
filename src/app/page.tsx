@@ -324,7 +324,7 @@ function RaidGuildSection() {
         >
           <Image
             src="/assets/logos/full-m800-m500.svg"
-            alt="RaidGuild"
+            alt=""
             width={360}
             height={104}
             className="h-auto w-56"
