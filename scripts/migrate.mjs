@@ -49,13 +49,14 @@ function isLocalDatabaseUrl(url) {
 const pool = isLocalDatabaseUrl(connectionString)
   ? new PgPool({ connectionString })
   : new NeonPool({ connectionString });
+const client = await pool.connect();
 let lockAcquired = false;
 
 try {
-  await pool.query("select pg_advisory_lock(hashtext('raidguild_forge_migrations'))");
+  await client.query("select pg_advisory_lock(hashtext('raidguild_forge_migrations'))");
   lockAcquired = true;
 
-  await pool.query(`
+  await client.query(`
     create table if not exists schema_migrations (
       filename text primary key,
       checksum text not null,
@@ -70,7 +71,7 @@ try {
   for (const file of migrationFiles) {
     const sql = await readFile(join(migrationsDir, file), "utf8");
     const checksum = createHash("sha256").update(sql).digest("hex");
-    const applied = await pool.query(
+    const applied = await client.query(
       "select checksum from schema_migrations where filename = $1",
       [file],
     );
@@ -84,16 +85,24 @@ try {
       throw new Error(`Migration checksum changed after apply: ${file}`);
     }
 
-    await pool.query(sql);
-    await pool.query(
-      "insert into schema_migrations (filename, checksum) values ($1, $2)",
-      [file, checksum],
-    );
+    await client.query("begin");
+    try {
+      await client.query(sql);
+      await client.query(
+        "insert into schema_migrations (filename, checksum) values ($1, $2)",
+        [file, checksum],
+      );
+      await client.query("commit");
+    } catch (error) {
+      await client.query("rollback");
+      throw error;
+    }
     console.log(`Applied ${file}`);
   }
 } finally {
   if (lockAcquired) {
-    await pool.query("select pg_advisory_unlock(hashtext('raidguild_forge_migrations'))");
+    await client.query("select pg_advisory_unlock(hashtext('raidguild_forge_migrations'))");
   }
+  client.release();
   await pool.end();
 }
