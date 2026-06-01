@@ -1,5 +1,7 @@
 import type { StaticImageData } from "next/image";
 
+import { gameProjects } from "@/lib/games";
+
 type Project = {
   title: string;
   status: string;
@@ -54,33 +56,14 @@ export const personaSteps = [
 ];
 
 export const featuredGames: Project[] = [
-  {
-    title: "Titan Racers",
-    status: "Concept / Prototype planned",
-    description:
-      "A creator-first sci-fi racing game where players assemble real-world-compatible mini karts and prove them on hidden tracks inside a Titan orbital habitat.",
-    image: "/assets/projects/forge-hero-workbench.png",
-    href: "/games",
-    cta: "View game direction",
-  },
-  {
-    title: "Auto Tower Defense",
-    status: "Playable alpha / not currently active",
-    description:
-      "An early tower-defense auto battler experiment around patented components, async saved battles, and royalty splits.",
-    image: "/assets/projects/auto-tower-defense.jpg",
-    href: "/games",
-    cta: "View status",
-  },
-  {
-    title: "DAO: The Game",
-    status: "Playable demo / not currently active",
-    description:
-      "A short playable management demo about accidental contracts, improvised organizations, and shipping under pressure.",
-    image: "/assets/projects/dao-the-game-card.png",
-    href: "https://www.daothegame.com/",
-    cta: "Play demo",
-  },
+  ...gameProjects.map((game) => ({
+    title: game.title,
+    status: game.status,
+    description: game.summary,
+    image: game.image,
+    href: game.href ?? "/games",
+    cta: game.primaryCta,
+  })),
 ];
 
 export const learnPreview: LearnItem[] = [

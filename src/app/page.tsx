@@ -315,13 +315,21 @@ function RaidGuildSection() {
   return (
     <section className="border-b border-moloch-800/15 py-16 md:py-24">
       <div className="container-custom grid gap-8 md:grid-cols-[0.7fr_1fr] md:items-center">
-        <Image
-          src="/assets/logos/full-m800-m500.svg"
-          alt="RaidGuild"
-          width={360}
-          height={104}
-          className="h-auto w-56"
-        />
+        <Link
+          href="https://www.raidguild.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Visit RaidGuild"
+          className="w-fit"
+        >
+          <Image
+            src="/assets/logos/full-m800-m500.svg"
+            alt=""
+            width={360}
+            height={104}
+            className="h-auto w-56"
+          />
+        </Link>
         <div>
           <p className="type-label-sm mb-3 text-moloch-500">Built from RaidGuild</p>
           <p className="type-body-lg max-w-3xl text-moloch-800/78">

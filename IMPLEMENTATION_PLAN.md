@@ -85,15 +85,15 @@ Build the Games catalogue.
 Initial projects:
 
 - Titan Racers
-- Auto Tower Defense
 - DAO: The Game
+- Auto Tower Defense
 
 Planned scope:
 
-- Status labels such as Concept, Playable alpha / not currently active, and Playable demo / not currently active
-- Project cards and/or detail pages
-- Links to playable demos where available
-- Analytics for filters, project opens, and external play links
+- Status labels such as In concept, Playable demo / complete, and Alpha released / not currently active
+- Project catalogue cards without detail pages for v1
+- Links to project/demo sites where available
+- Analytics for filters and external project links
 
 Debrief topics:
 
