@@ -15,7 +15,6 @@ export const analyticsEvents = {
   gameFilterChange: "game_filter_change",
   learnArticleClick: "learn_article_click",
   projectClick: "project_card_click",
-  learnClick: "learn_preview_click",
   learnTopicFilterChange: "learn_topic_filter_change",
   navClick: "nav_click",
   subscribeConfirm: "subscribe_confirm",

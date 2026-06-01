@@ -15,7 +15,7 @@ import { TrackLink } from "@/components/track-link";
 import { Button } from "@/components/ui/button";
 import { analyticsEvents } from "@/lib/analytics";
 import { featuredGames, focusPillars, personaSteps } from "@/lib/home";
-import { getLearnArticles, type LearnArticle } from "@/lib/learn";
+import { formatArticleDate, getLearnArticles, type LearnArticle } from "@/lib/learn";
 
 const pillarIcons = [Hammer, DraftingCompass, BadgeDollarSign];
 
@@ -310,7 +310,7 @@ function LearnSection({ articles }: { articles: LearnArticle[] }) {
                     </div>
                     <p className="type-label-sm mb-3 flex items-center gap-2 text-moloch-500">
                       <CalendarDays aria-hidden="true" size={14} strokeWidth={1.8} />
-                      {formatDate(article.publishedAt)}
+                      {formatArticleDate(article.publishedAt)}
                     </p>
                     <h3 className="type-heading-md mb-3">{article.title}</h3>
                     {article.subtitle ? (
@@ -338,14 +338,6 @@ function LearnSection({ articles }: { articles: LearnArticle[] }) {
       </div>
     </section>
   );
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(value));
 }
 
 function RaidGuildSection() {

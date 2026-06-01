@@ -2,6 +2,7 @@ const PARAGRAPH_API_BASE = "https://api.paragraph.com/api/v1";
 const FORGE_PUBLICATION_SLUG = "raidguild-forge";
 const FORGE_PUBLICATION_ID = "h4XhXsddbakuhoBAxme2";
 const POST_LIMIT = 60;
+const MAX_POST_PAGES = 20;
 
 export type LearnTopic =
   | "Autonomous Worlds"
@@ -80,8 +81,12 @@ async function getPublicationId() {
 async function getAllPublishedPosts(publicationId: string) {
   const posts: ParagraphPost[] = [];
   let cursor: string | undefined;
+  let pageCount = 0;
+  const seenCursors = new Set<string>();
 
   do {
+    pageCount += 1;
+
     const params = new URLSearchParams({ limit: String(POST_LIMIT) });
 
     if (cursor) {
@@ -93,7 +98,19 @@ async function getAllPublishedPosts(publicationId: string) {
     );
 
     posts.push(...(Array.isArray(page.items) ? page.items : []));
-    cursor = page.pagination?.hasMore ? page.pagination.cursor : undefined;
+    const nextCursor = page.pagination?.hasMore ? page.pagination.cursor : undefined;
+
+    if (typeof nextCursor !== "string" || seenCursors.has(nextCursor)) {
+      cursor = undefined;
+    } else {
+      seenCursors.add(nextCursor);
+      cursor = nextCursor;
+    }
+
+    if (pageCount >= MAX_POST_PAGES && cursor) {
+      console.warn("Stopped Paragraph post pagination after reaching the page limit");
+      cursor = undefined;
+    }
   } while (cursor);
 
   return posts;
@@ -148,6 +165,14 @@ function normalizeDate(value: string) {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
+export function formatArticleDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
 function getTopics(categories: string[]): LearnTopic[] {
   const normalizedCategories = new Set(categories.map((category) => category.toLowerCase()));
   const topics = new Set<LearnTopic>();
@@ -186,5 +211,7 @@ function getTopics(categories: string[]): LearnTopic[] {
 }
 
 function hasAny(values: Set<string>, candidates: string[]) {
-  return candidates.some((candidate) => values.has(candidate));
+  return candidates.some((candidate) =>
+    [...values].some((value) => value.includes(candidate)),
+  );
 }

@@ -6,7 +6,12 @@ import { useMemo, useState } from "react";
 
 import { TrackLink } from "@/components/track-link";
 import { analyticsEvents, trackEvent } from "@/lib/analytics";
-import { type LearnArticle, type LearnTopic, learnTopics } from "@/lib/learn";
+import {
+  formatArticleDate,
+  type LearnArticle,
+  type LearnTopic,
+  learnTopics,
+} from "@/lib/learn";
 import { cn } from "@/lib/utils";
 
 type TopicFilter = LearnTopic | "all";
@@ -75,9 +80,25 @@ export function LearnCatalogue({ articles }: { articles: LearnArticle[] }) {
       </div>
 
       <div className="grid gap-5">
-        {visibleArticles.map((article) => (
-          <ArticleCard key={article.id} article={article} />
-        ))}
+        {visibleArticles.length > 0 ? (
+          visibleArticles.map((article) => (
+            <ArticleCard key={article.id} article={article} />
+          ))
+        ) : (
+          <div role="status" className="border border-moloch-800/15 bg-scroll-100 p-6">
+            <p className="type-label-sm mb-3 text-moloch-500">No posts found</p>
+            <p className="type-body-lg max-w-2xl text-moloch-800/76">
+              No published posts match this topic yet.
+            </p>
+            <button
+              type="button"
+              className="type-label-sm mt-5 cursor-pointer border border-moloch-800 px-3 py-2 text-moloch-800 transition-colors hover:bg-moloch-800 hover:text-scroll-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              onClick={() => selectTopic("all")}
+            >
+              View all topics
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -115,18 +136,18 @@ function ArticleCard({ article }: { article: LearnArticle }) {
       <div className="grid p-5 md:p-6">
         <div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            {article.topics.map((topic) => (
+            {article.topics.map((articleTopic) => (
               <span
-                key={topic}
+                key={articleTopic}
                 className="type-label-sm border border-moloch-800/12 px-2 py-1 text-moloch-800/60"
               >
-                {topic}
+                {articleTopic}
               </span>
             ))}
           </div>
           <p className="type-label-sm mb-3 flex items-center gap-2 text-moloch-500">
             <CalendarDays aria-hidden="true" size={14} strokeWidth={1.8} />
-            {formatDate(article.publishedAt)}
+            {formatArticleDate(article.publishedAt)}
           </p>
           <h2 className="type-heading-md text-moloch-800">{article.title}</h2>
           {article.subtitle ? (
@@ -140,12 +161,4 @@ function ArticleCard({ article }: { article: LearnArticle }) {
       </div>
     </TrackLink>
   );
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(value));
 }
