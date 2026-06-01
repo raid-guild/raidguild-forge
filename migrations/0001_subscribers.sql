@@ -12,12 +12,6 @@ create table if not exists subscribers (
   updated_at timestamptz not null default now()
 );
 
-alter table subscribers
-  add column if not exists unsubscribe_token_hash text unique;
-
-alter table subscribers
-  add column if not exists unsubscribed_at timestamptz;
-
 create table if not exists subscriber_preferences (
   subscriber_id uuid primary key references subscribers(id) on delete cascade,
   learn boolean not null default true,

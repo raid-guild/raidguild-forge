@@ -13,6 +13,23 @@ function getRequiredEnv(name: string) {
   return value;
 }
 
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case "&":
+        return "&amp;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case "\"":
+        return "&quot;";
+      default:
+        return "&#39;";
+    }
+  });
+}
+
 export async function sendConfirmationEmail({
   to,
   confirmationUrl,
@@ -25,8 +42,7 @@ export async function sendConfirmationEmail({
   const apiKey = process.env.SENDGRID_API_KEY;
 
   if (!apiKey && process.env.NODE_ENV !== "production") {
-    console.info("Subscribe confirmation URL:", confirmationUrl);
-    console.info("Subscribe unsubscribe URL:", unsubscribeUrl);
+    console.info("SendGrid disabled; skipping subscribe confirmation email send.");
     return;
   }
 
@@ -34,6 +50,8 @@ export async function sendConfirmationEmail({
 
   const fromEmail = process.env.SENDGRID_FROM_EMAIL ?? defaultFromEmail;
   const fromName = process.env.SENDGRID_FROM_NAME ?? defaultFromName;
+  const escapedConfirmationUrl = escapeHtml(confirmationUrl);
+  const escapedUnsubscribeUrl = escapeHtml(unsubscribeUrl);
 
   await sgMail.send({
     to,
@@ -54,8 +72,8 @@ export async function sendConfirmationEmail({
     ].join("\n"),
     html: `
       <p>Confirm that you want updates from RaidGuild Forge.</p>
-      <p><a href="${confirmationUrl}">Confirm your email</a></p>
-      <p>You can <a href="${unsubscribeUrl}">unsubscribe at any time</a>.</p>
+      <p><a href="${escapedConfirmationUrl}">Confirm your email</a></p>
+      <p>You can <a href="${escapedUnsubscribeUrl}">unsubscribe at any time</a>.</p>
       <p>If you did not request this, you can ignore this email.</p>
     `,
   });

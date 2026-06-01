@@ -205,7 +205,7 @@ export function StayUpdatedButton({
           </div>
           <button
             type="button"
-            className="grid size-10 cursor-pointer place-items-center border border-moloch-800/20 text-moloch-800 transition-colors hover:bg-moloch-800 hover:text-scroll-100"
+            className="grid size-10 cursor-pointer place-items-center border border-moloch-800/20 text-moloch-800 transition-colors hover:bg-moloch-800 hover:text-scroll-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             onClick={closeModal}
             aria-label="Close subscribe form"
           >

@@ -11,10 +11,6 @@ type SubscriberRow = {
   verified_at: string | null;
 };
 
-type ConfirmationRow = {
-  subscriber_id: string;
-};
-
 export async function upsertSubscriber({
   email,
   preferences,
@@ -37,14 +33,12 @@ export async function upsertSubscriber({
         email_hash,
         unsubscribe_token_hash,
         source,
-        unsubscribed_at,
         updated_at
       )
-      values ($1, $2, $3, $4, null, now())
+      values ($1, $2, $3, $4, now())
       on conflict (email) do update
       set unsubscribe_token_hash = excluded.unsubscribe_token_hash,
           source = coalesce(excluded.source, subscribers.source),
-          unsubscribed_at = null,
           updated_at = now()
       returning id, verified_at
     `,
@@ -84,6 +78,17 @@ export async function createConfirmation({
 
   await query(
     `
+      update email_confirmations
+      set expires_at = now()
+      where subscriber_id = $1
+        and confirmed_at is null
+        and expires_at > now()
+    `,
+    [subscriberId],
+  );
+
+  await query(
+    `
       insert into email_confirmations (subscriber_id, token_hash, expires_at)
       values ($1, $2, now() + interval '7 days')
     `,
@@ -94,35 +99,27 @@ export async function createConfirmation({
 export async function confirmSubscriber(token: string) {
   const tokenHash = hashConfirmationToken(token);
 
-  const confirmationResult = await query<ConfirmationRow>(
+  const result = await query<{ id: string }>(
     `
-      update email_confirmations
-      set confirmed_at = now()
-      where token_hash = $1
-        and confirmed_at is null
-        and expires_at > now()
-      returning subscriber_id
+      with consumed as (
+        update email_confirmations
+        set confirmed_at = now()
+        where token_hash = $1
+          and confirmed_at is null
+          and expires_at > now()
+        returning subscriber_id
+      )
+      update subscribers
+      set verified_at = coalesce(verified_at, now()),
+          unsubscribed_at = null,
+          updated_at = now()
+      where id = (select subscriber_id from consumed)
+      returning id
     `,
     [tokenHash],
   );
 
-  const confirmation = confirmationResult.rows[0];
-
-  if (!confirmation) {
-    return false;
-  }
-
-  await query(
-    `
-      update subscribers
-      set verified_at = coalesce(verified_at, now()),
-          updated_at = now()
-      where id = $1
-    `,
-    [confirmation.subscriber_id],
-  );
-
-  return true;
+  return result.rows.length > 0;
 }
 
 export async function unsubscribeSubscriber(token: string) {
@@ -131,10 +128,9 @@ export async function unsubscribeSubscriber(token: string) {
   const result = await query<{ id: string }>(
     `
       update subscribers
-      set unsubscribed_at = now(),
+      set unsubscribed_at = coalesce(unsubscribed_at, now()),
           updated_at = now()
       where unsubscribe_token_hash = $1
-        and unsubscribed_at is null
       returning id
     `,
     [tokenHash],

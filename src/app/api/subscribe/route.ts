@@ -21,7 +21,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getOrigin(request: NextRequest) {
   return (
-    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.SITE_URL ??
     process.env.VERCEL_PROJECT_PRODUCTION_URL?.replace(/^/, "https://") ??
     request.nextUrl.origin
   );
@@ -33,6 +33,32 @@ function normalizeSource(source: unknown) {
   }
 
   return source.replace(/[^a-z0-9_-]/gi, "").slice(0, 48) || undefined;
+}
+
+function parsePreferences(input: unknown) {
+  if (input === undefined) {
+    return normalizePreferences(undefined);
+  }
+
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    return null;
+  }
+
+  const values = input as Record<string, unknown>;
+  const keys = ["learn", "games", "marketplace"] as const;
+  const parsed: Partial<Record<(typeof keys)[number], boolean>> = {};
+
+  for (const key of keys) {
+    if (values[key] !== undefined && typeof values[key] !== "boolean") {
+      return null;
+    }
+
+    if (typeof values[key] === "boolean") {
+      parsed[key] = values[key];
+    }
+  }
+
+  return normalizePreferences(parsed);
 }
 
 export async function POST(request: NextRequest) {
@@ -48,11 +74,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
   }
 
-  const preferences = normalizePreferences({
-    learn: body.preferences?.learn === true,
-    games: body.preferences?.games === true,
-    marketplace: body.preferences?.marketplace === true,
-  });
+  const preferences = parsePreferences(body.preferences);
+
+  if (!preferences) {
+    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+  }
 
   if (!preferences.learn && !preferences.games && !preferences.marketplace) {
     return NextResponse.json(

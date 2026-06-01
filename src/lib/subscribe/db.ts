@@ -14,7 +14,12 @@ let pool: Queryable | undefined;
 function isLocalDatabaseUrl(connectionString: string) {
   try {
     const { hostname } = new URL(connectionString);
-    return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+    const normalizedHostname = hostname.replace(/^\[|\]$/g, "");
+    return (
+      normalizedHostname === "localhost" ||
+      normalizedHostname === "127.0.0.1" ||
+      normalizedHostname === "::1"
+    );
   } catch {
     return false;
   }
