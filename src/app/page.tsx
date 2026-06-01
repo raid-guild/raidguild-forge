@@ -1,4 +1,12 @@
-import { ArrowRight, BadgeDollarSign, BookOpen, DraftingCompass, Hammer, Wrench } from "lucide-react";
+import {
+  ArrowRight,
+  BadgeDollarSign,
+  BookOpen,
+  CalendarDays,
+  DraftingCompass,
+  Hammer,
+  Wrench,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -6,11 +14,14 @@ import { StayUpdatedButton } from "@/components/stay-updated-button";
 import { TrackLink } from "@/components/track-link";
 import { Button } from "@/components/ui/button";
 import { analyticsEvents } from "@/lib/analytics";
-import { featuredGames, focusPillars, learnPreview, personaSteps } from "@/lib/home";
+import { featuredGames, focusPillars, personaSteps } from "@/lib/home";
+import { getLearnArticles, type LearnArticle } from "@/lib/learn";
 
 const pillarIcons = [Hammer, DraftingCompass, BadgeDollarSign];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const latestArticles = (await getLearnArticles()).slice(0, 2);
+
   return (
     <>
       <HeroSection />
@@ -18,7 +29,7 @@ export default function HomePage() {
       <PersonaSection />
       <FeaturedProjectsSection />
       <MarketplaceSection />
-      <LearnSection />
+      <LearnSection articles={latestArticles} />
       <RaidGuildSection />
       <FinalCtaSection />
     </>
@@ -248,7 +259,7 @@ function MarketplaceSection() {
   );
 }
 
-function LearnSection() {
+function LearnSection({ articles }: { articles: LearnArticle[] }) {
   return (
     <section className="border-b border-moloch-800/15 py-16 md:py-24">
       <div className="container-custom">
@@ -261,54 +272,80 @@ function LearnSection() {
             <Link href="/learn">Go to Learn</Link>
           </Button>
         </div>
-        <div className="grid gap-5 md:grid-cols-2">
-          {learnPreview.map((item) => {
-            const isExternal = item.href.startsWith("http");
-
-            return (
+        {articles.length > 0 ? (
+          <div className="grid gap-5 md:grid-cols-2">
+            {articles.map((article) => (
               <TrackLink
-                key={item.title}
-                href={item.href}
-                eventName={analyticsEvents.learnClick}
-                eventProperties={{ article: item.title, location: "learn_preview" }}
+                key={article.id}
+                href={article.href}
+                eventName={analyticsEvents.learnArticleClick}
+                eventProperties={{
+                  article: article.title,
+                  location: "homepage_learn_preview",
+                  slug: article.slug,
+                }}
                 className="group grid overflow-hidden border border-moloch-800/15 bg-scroll-100 transition-[background-color,box-shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:bg-neutral-100 hover:shadow-[5px_5px_0_rgba(41,16,10,0.08)] md:grid-cols-[0.8fr_1fr]"
-                target={isExternal ? "_blank" : undefined}
-                rel={isExternal ? "noopener noreferrer" : undefined}
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <div className="relative min-h-64 border-b border-moloch-800/15 md:border-b-0 md:border-r">
-                  <Image
-                    src={item.image}
-                    alt=""
-                    fill
-                    className="project-card-media object-cover"
-                    sizes="(min-width: 768px) 40vw, 100vw"
-                  />
+                  {article.imageUrl ? (
+                    <Image
+                      src={article.imageUrl}
+                      alt=""
+                      fill
+                      className="project-card-media object-cover"
+                      sizes="(min-width: 768px) 40vw, 100vw"
+                    />
+                  ) : (
+                    <div className="flex h-full min-h-64 items-center justify-center bg-moloch-800 text-scroll-100">
+                      <BookOpen aria-hidden="true" size={44} strokeWidth={1.5} />
+                    </div>
+                  )}
                 </div>
                 <div className="grid p-6">
                   <div>
                     <div className="mb-8 flex size-11 items-center justify-center rounded-md bg-moloch-500 text-scroll-100">
                       <BookOpen aria-hidden="true" size={21} strokeWidth={1.8} />
                     </div>
-                    <p className="type-label-sm mb-3 text-moloch-500">
-                      {item.eyebrow}
+                    <p className="type-label-sm mb-3 flex items-center gap-2 text-moloch-500">
+                      <CalendarDays aria-hidden="true" size={14} strokeWidth={1.8} />
+                      {formatDate(article.publishedAt)}
                     </p>
-                    <h3 className="type-heading-md mb-3">{item.title}</h3>
-                    <p className="type-body-md text-moloch-800/75">
-                      {item.description}
-                    </p>
+                    <h3 className="type-heading-md mb-3">{article.title}</h3>
+                    {article.subtitle ? (
+                      <p className="type-body-md text-moloch-800/75">
+                        {article.subtitle}
+                      </p>
+                    ) : null}
                   </div>
                   <span className="type-label-sm mt-8 inline-flex items-center gap-2 self-end text-moloch-500">
-                    Read more
+                    Read on Paragraph
                     <ArrowRight aria-hidden="true" size={16} strokeWidth={1.8} />
                   </span>
                 </div>
               </TrackLink>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="border border-moloch-800/15 bg-scroll-100 p-6 shadow-[8px_8px_0_rgba(41,16,10,0.08)]">
+            <p className="type-body-lg max-w-2xl text-moloch-800/76">
+              Published Learn posts from Paragraph will appear here once the index is
+              available.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
 }
 
 function RaidGuildSection() {

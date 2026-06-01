@@ -108,17 +108,16 @@ Build Learn as the home for articles, build logs, and experiments.
 
 Planned scope:
 
-- Article index
-- Seed content/cards for existing Paragraph posts
-- Upcoming voice-controlled cooking companion placeholder
+- Article index backed by published Paragraph posts
+- Hourly revalidation for newly published posts
 - Category/tag system
-- External Paragraph links or local article pages
+- External Paragraph links
 - Analytics for article and topic interest
 
 Debrief topics:
 
-- Local content files vs linking to Paragraph
-- Initial article list
+- Paragraph API indexing
+- Published-only article list
 - Categories
 - How much old web3 language to surface
 

@@ -11,14 +11,6 @@ type Project = {
   cta: string;
 };
 
-type LearnItem = {
-  title: string;
-  eyebrow: string;
-  description: string;
-  image: string | StaticImageData;
-  href: string;
-};
-
 export const focusPillars = [
   {
     title: "Learn by building",
@@ -64,23 +56,4 @@ export const featuredGames: Project[] = [
     href: game.href ?? "/games",
     cta: game.primaryCta,
   })),
-];
-
-export const learnPreview: LearnItem[] = [
-  {
-    title: "Building a Web3 Gaming Console",
-    eyebrow: "Hardware build log",
-    description:
-      "A DIY exploration of cheap handheld hardware, Godot, MUD, and what a dedicated on-chain game device could become.",
-    image: "/assets/projects/web3-console.jpg",
-    href: "https://paragraph.com/@raidguild-forge/building-a-web3-gaming-console-part-1",
-  },
-  {
-    title: "Voice-Controlled Cooking Companion",
-    eyebrow: "Coming soon",
-    description:
-      "A hands-on assistant project that extends Forge beyond games into useful, playful tools for real spaces.",
-    image: "/assets/projects/forge-hero-workbench.png",
-    href: "/learn",
-  },
 ];
