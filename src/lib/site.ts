@@ -4,12 +4,15 @@ function normalizeSiteUrl(url: string) {
   return withProtocol.replace(/\/$/, "");
 }
 
-const fallbackSiteUrl = "https://raidguild-forge.vercel.app";
+const fallbackSiteUrl = "https://forge.raidguild.org";
+const getEnvUrl = (...values: Array<string | undefined>) =>
+  values.find((value) => value?.trim()) ?? fallbackSiteUrl;
 const envSiteUrl =
-  process.env.SITE_URL ??
-  process.env.VERCEL_PROJECT_PRODUCTION_URL ??
-  process.env.VERCEL_URL ??
-  fallbackSiteUrl;
+  getEnvUrl(
+    process.env.SITE_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_URL,
+  );
 
 export const siteConfig = {
   name: "RaidGuild Forge",
