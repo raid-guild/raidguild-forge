@@ -17,6 +17,8 @@ export function SiteFooter() {
             <Link
               key={item.href}
               href={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noopener noreferrer" : undefined}
               className="type-label-sm text-moloch-800/75 hover:text-moloch-500"
             >
               {item.label}

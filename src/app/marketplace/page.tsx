@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   BadgeDollarSign,
   Boxes,
   CircuitBoard,
@@ -6,12 +7,16 @@ import {
   Filter,
   Fingerprint,
   Hammer,
+  LayoutGrid,
   ShieldCheck,
   WalletCards,
 } from "lucide-react";
 import Image from "next/image";
 
 import { StayUpdatedButton } from "@/components/stay-updated-button";
+import { TrackLink } from "@/components/track-link";
+import { analyticsEvents } from "@/lib/analytics";
+import { marketplaceItems } from "@/lib/marketplace";
 import type { SubscriberPreferences } from "@/lib/subscribe/preferences";
 
 export const metadata = {
@@ -77,26 +82,107 @@ const marketplaceFlow = [
 export default function MarketplacePage() {
   return (
     <>
-      <section className="relative isolate overflow-hidden border-b border-moloch-800/15 bg-moloch-800 text-scroll-100">
-        <Image
-          src="/assets/projects/forge-hero-workbench.png"
-          alt=""
-          fill
-          priority
-          className="animate-forge-drift object-cover opacity-45"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(41,16,10,0.96)_0%,rgba(41,16,10,0.88)_42%,rgba(41,16,10,0.54)_100%)]" />
-        <div className="container-custom relative py-16 md:py-24">
-          <div className="max-w-4xl">
-            <p className="type-label-sm mb-4 text-moloch-300">Marketplace</p>
-            <h1 className="font-display text-[clamp(2.5rem,7vw,5rem)] font-bold leading-[1.04] tracking-[0]">
-              Buildable designs, tested through play.
-            </h1>
-            <p className="type-body-lg mt-6 max-w-2xl text-scroll-100/78">
-              The Forge Marketplace is where useful components, machines, and
-              physical kits become available to license, build, and remix.
-            </p>
+      <section className="border-b border-moloch-800/15 bg-scroll-100">
+        <div className="container-custom py-8 md:py-10">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="type-label-sm mb-3 text-moloch-500">Marketplace</p>
+              <h1 className="font-display text-[clamp(2.25rem,5vw,3.75rem)] font-bold leading-[1.08] tracking-[0]">
+                Buildable designs, tested through play.
+              </h1>
+              <p className="type-body-lg mt-4 max-w-2xl text-moloch-800/76">
+                Browse licensed components, machines, and physical kit files as
+                Forge projects move useful creations into builder inventory.
+              </p>
+            </div>
+            <div className="grid gap-2 sm:flex sm:flex-wrap lg:justify-end">
+              <DashboardMetric label="Listings" value={`${marketplaceItems.length}`} />
+              <DashboardMetric label="Type" value="Physical kits" />
+              <DashboardMetric label="Access" value="x402" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-moloch-800/15 bg-scroll-200/35 py-10 md:py-14">
+        <div className="container-custom">
+          <div className="mb-5 grid gap-3 border-y border-moloch-800/12 py-4 md:grid-cols-[1fr_auto] md:items-center">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-moloch-500 text-scroll-100">
+                <LayoutGrid aria-hidden="true" size={18} strokeWidth={1.8} />
+              </div>
+              <div className="min-w-0">
+                <p className="type-label-sm text-moloch-500">Inventory</p>
+                <p className="type-body-md truncate text-moloch-800/68">
+                  Active and upcoming marketplace listings
+                </p>
+              </div>
+            </div>
+            <div className="type-label-sm flex flex-wrap gap-x-4 gap-y-2 text-moloch-800/60">
+              <span>{marketplaceItems.length} listed</span>
+              <span>Physical kit files</span>
+              <span>x402 access</span>
+            </div>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            {marketplaceItems.map((item) => (
+              <TrackLink
+                key={item.slug}
+                href={`/marketplace/${item.slug}`}
+                eventName={analyticsEvents.marketplaceKitClick}
+                eventProperties={{ kit: item.slug, location: "marketplace_catalogue" }}
+                className="group grid overflow-hidden border border-moloch-800/15 bg-scroll-100 text-moloch-800 transition-[box-shadow,transform,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-moloch-500 hover:shadow-[5px_5px_0_rgba(189,72,45,0.16)]"
+              >
+                <div className="relative aspect-[16/9] overflow-hidden border-b border-moloch-800/15">
+                  <Image
+                    src={item.image}
+                    alt=""
+                    fill
+                    className="project-card-media object-cover"
+                    sizes="(min-width: 1280px) 38vw, 100vw"
+                  />
+                </div>
+                <div className="grid gap-5 p-5">
+                  <div>
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <span className="type-label-sm border border-moloch-500 bg-moloch-500 px-2 py-1 text-scroll-100">
+                        Listed
+                      </span>
+                      <span className="type-label-sm border border-moloch-800/12 px-2 py-1 text-moloch-800/62">
+                        {item.category}
+                      </span>
+                    </div>
+                    <h2 className="type-heading-md text-moloch-800">{item.title}</h2>
+                    <p className="type-body-md mt-3 text-moloch-800/74">
+                      {item.summary}
+                    </p>
+                  </div>
+                  <div className="grid gap-3 border-y border-moloch-800/12 py-4 sm:grid-cols-2">
+                    <DetailItem label="Creator" value={item.attribution} />
+                    <DetailItem label="License" value={item.licenseName} />
+                    <DetailItem label="Access" value="Gated download" />
+                    <DetailItem label="Payment" value="x402 endpoint" />
+                  </div>
+                  <span className="type-label-sm inline-flex items-center gap-2 text-moloch-500">
+                    {item.primaryCta}
+                    <ArrowRight aria-hidden="true" size={16} strokeWidth={1.8} />
+                  </span>
+                </div>
+              </TrackLink>
+            ))}
+            <div className="grid min-h-72 place-items-center border border-dashed border-moloch-800/20 bg-scroll-200/25 p-6 text-center">
+              <div className="max-w-sm">
+                <p className="type-label-sm mb-3 text-moloch-500">More listings</p>
+                <h3 className="type-heading-md mb-3 text-moloch-800">
+                  Components and machines will land here.
+                </h3>
+                <p className="type-body-md text-moloch-800/62">
+                  As Forge projects produce reusable parts, assemblies, and
+                  physical build packages, they will join this catalogue.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -246,5 +332,23 @@ export default function MarketplacePage() {
         </div>
       </section>
     </>
+  );
+}
+
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="type-label-sm mb-1 text-moloch-800/55">{label}</p>
+      <p className="type-body-md text-moloch-800/78">{value}</p>
+    </div>
+  );
+}
+
+function DashboardMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="type-label-sm inline-flex items-baseline gap-2 border border-moloch-800/14 bg-scroll-200/35 px-3 py-2 text-moloch-800/58">
+      <span>{label}</span>
+      <span className="text-moloch-800">{value}</span>
+    </div>
   );
 }

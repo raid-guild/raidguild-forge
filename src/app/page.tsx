@@ -234,9 +234,9 @@ function MarketplaceSection() {
           </p>
         </div>
         <div className="border border-moloch-800/15 bg-scroll-100 p-6 shadow-[10px_10px_0_rgba(83,74,19,0.14)]">
-          <p className="type-label-sm mb-4 text-moloch-500">Future catalogue</p>
+          <p className="type-label-sm mb-4 text-moloch-500">Marketplace catalogue</p>
           <ul className="grid gap-3">
-            {["Components", "Machines", "Physical kits", "Filter by game"].map((item) => (
+            {["Components", "Machines", "Physical kits", "License-based access"].map((item) => (
               <li
                 key={item}
                 className="group flex items-center justify-between border-b border-moloch-800/12 pb-3 last:border-b-0 last:pb-0"
@@ -250,7 +250,10 @@ function MarketplaceSection() {
               </li>
             ))}
           </ul>
-          <div className="mt-6">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Button asChild variant="primary">
+              <Link href="/marketplace">Visit marketplace</Link>
+            </Button>
             <StayUpdatedButton location="marketplace_preview" variant="secondary" />
           </div>
         </div>

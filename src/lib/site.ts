@@ -32,6 +32,7 @@ export const siteConfig = {
     { href: "/learn", label: "Learn" },
     { href: "/games", label: "Games" },
     { href: "/marketplace", label: "Marketplace" },
+    { href: "https://discord.gg/2vx47gT95y", label: "Discord", external: true },
     { href: "/privacy", label: "Privacy" },
   ],
 };
