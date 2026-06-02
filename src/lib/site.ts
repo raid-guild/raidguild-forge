@@ -1,9 +1,22 @@
+function normalizeSiteUrl(url: string) {
+  const withProtocol = url.startsWith("http") ? url : `https://${url}`;
+
+  return withProtocol.replace(/\/$/, "");
+}
+
+const fallbackSiteUrl = "https://raidguild-forge.vercel.app";
+const envSiteUrl =
+  process.env.SITE_URL ??
+  process.env.VERCEL_PROJECT_PRODUCTION_URL ??
+  process.env.VERCEL_URL ??
+  fallbackSiteUrl;
+
 export const siteConfig = {
   name: "RaidGuild Forge",
   title: "RaidGuild Forge | Autonomous Worlds With Real Machines",
   description:
     "RaidGuild Forge builds games and tools where players design useful machines, test them through physics, and earn from their work when others build on it.",
-  url: "https://raidguild-forge.vercel.app",
+  url: normalizeSiteUrl(envSiteUrl),
   ogImage: "/assets/social/raidguild-forge-og-1200x630.png",
   nav: [
     { href: "/", label: "Home" },

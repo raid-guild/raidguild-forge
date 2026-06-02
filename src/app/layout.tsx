@@ -19,13 +19,9 @@ export const metadata: Metadata = {
   authors: [{ name: "RaidGuild DAO" }],
   creator: "RaidGuild DAO",
   publisher: "RaidGuild DAO",
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "/",
     siteName: siteConfig.name,
     title: siteConfig.title,
     description: siteConfig.description,
