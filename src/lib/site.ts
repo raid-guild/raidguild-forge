@@ -14,7 +14,21 @@ const envSiteUrl =
     process.env.VERCEL_URL,
   );
 
-export const siteConfig = {
+type SiteNavItem = {
+  href: string;
+  label: string;
+  external?: boolean;
+};
+
+export const siteConfig: {
+  name: string;
+  title: string;
+  description: string;
+  url: string;
+  ogImage: string;
+  nav: SiteNavItem[];
+  footerNav: SiteNavItem[];
+} = {
   name: "RaidGuild Forge",
   title: "RaidGuild Forge | Autonomous Worlds With Real Machines",
   description:
@@ -32,6 +46,7 @@ export const siteConfig = {
     { href: "/learn", label: "Learn" },
     { href: "/games", label: "Games" },
     { href: "/marketplace", label: "Marketplace" },
+    { href: "https://discord.gg/2vx47gT95y", label: "Discord", external: true },
     { href: "/privacy", label: "Privacy" },
   ],
 };
