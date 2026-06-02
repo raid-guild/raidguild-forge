@@ -35,7 +35,3 @@ hosts unless `FORCE_DB_RESET=true` is set.
 SendGrid confirmation emails use `SENDGRID_API_KEY`,
 `SENDGRID_FROM_EMAIL`, and `SENDGRID_FROM_NAME`. Confirmation links use
 `SITE_URL`, then fall back to the Vercel deployment URL or request origin.
-
-## Project Plan
-
-See `IMPLEMENTATION_PLAN.md` for the PR-by-PR implementation plan.
