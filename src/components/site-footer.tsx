@@ -13,7 +13,7 @@ export function SiteFooter() {
           </p>
         </div>
         <nav aria-label="Footer navigation" className="flex flex-wrap gap-4 md:justify-end">
-          {siteConfig.nav.map((item) => (
+          {siteConfig.footerNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}

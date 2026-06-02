@@ -14,6 +14,12 @@ import Image from "next/image";
 import { StayUpdatedButton } from "@/components/stay-updated-button";
 import type { SubscriberPreferences } from "@/lib/subscribe/preferences";
 
+export const metadata = {
+  title: "Marketplace",
+  description:
+    "Buildable components, machines, and physical kits from RaidGuild Forge, organized around licenses, attribution, royalties, and remixable work.",
+};
+
 const marketplacePreferences: SubscriberPreferences = {
   learn: false,
   games: false,

@@ -2,6 +2,12 @@ import { LearnCatalogue } from "@/components/learn-catalogue";
 import { StayUpdatedButton } from "@/components/stay-updated-button";
 import { getLearnArticles } from "@/lib/learn";
 
+export const metadata = {
+  title: "Learn",
+  description:
+    "Build logs, essays, and experiments from RaidGuild Forge on hardware, game systems, autonomous worlds, royalties, and maker education.",
+};
+
 export const revalidate = 3600;
 
 export default async function LearnPage() {

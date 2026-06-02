@@ -1,6 +1,12 @@
 import { GamesCatalogue } from "@/components/games-catalogue";
 import { StayUpdatedButton } from "@/components/stay-updated-button";
 
+export const metadata = {
+  title: "Games",
+  description:
+    "Concept worlds, playable demos, and older alpha experiments where Forge machines are designed, assembled, and tested through play.",
+};
+
 export default function GamesPage() {
   return (
     <>
