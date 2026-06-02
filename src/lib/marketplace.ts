@@ -11,6 +11,8 @@ export type MarketplaceItem = {
   category: string;
   delivery: string;
   status: string;
+  game: string;
+  headline: string;
   summary: string;
   description: string;
   image: string;
@@ -32,6 +34,8 @@ export const marketplaceItems: MarketplaceItem[] = [
     category: "Physical Kit",
     delivery: "Downloadable build package",
     status: "Listed",
+    game: "Voice Cooking Companion",
+    headline: "A countertop recipe helper for hands-busy cooking.",
     summary:
       "A downloadable build package for a low-cost ESP32-S3 countertop cooking companion that answers recipe questions by voice.",
     description:

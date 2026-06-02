@@ -147,7 +147,7 @@ export default function MarketplacePage() {
                   <div>
                     <div className="mb-3 flex flex-wrap items-center gap-2">
                       <span className="type-label-sm border border-moloch-500 bg-moloch-500 px-2 py-1 text-scroll-100">
-                        Listed
+                        {item.status}
                       </span>
                       <span className="type-label-sm border border-moloch-800/12 px-2 py-1 text-moloch-800/62">
                         {item.category}
@@ -160,9 +160,9 @@ export default function MarketplacePage() {
                   </div>
                   <div className="grid gap-3 border-y border-moloch-800/12 py-4 sm:grid-cols-2">
                     <DetailItem label="Creator" value={item.attribution} />
+                    <DetailItem label="Game" value={item.game} />
                     <DetailItem label="License" value={item.licenseName} />
                     <DetailItem label="Access" value="Gated download" />
-                    <DetailItem label="Payment" value="x402 endpoint" />
                   </div>
                   <span className="type-label-sm inline-flex items-center gap-2 text-moloch-500">
                     {item.primaryCta}

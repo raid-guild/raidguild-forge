@@ -34,15 +34,21 @@ Status: planned
 - Show tucked-away payment details on the kit page.
 - Implement `Buy Kit Files` purchase/download behavior.
 - Track anonymous purchase click, success, and error events.
+- Never send wallet addresses to analytics; purchase events must remain anonymous.
+
+Note: marketplace items include game metadata for future filtering, but game
+filter UI should wait until there are enough game-linked listings to make it
+useful.
 
 ### PR C: Admin Notifications
 
 Status: planned
 
 - Add `ADMIN_NOTIFY_EMAIL`.
-- Send an owner notification when someone subscribes for updates.
-- Send a best-effort owner notification after successful kit download.
-- Update README environment variable documentation.
+- Store subscriber data in Neon for production and local Postgres through `DATABASE_URL` for development.
+- Send an owner notification via SendGrid when someone subscribes for updates.
+- Send a best-effort owner notification via SendGrid after successful kit download.
+- Update README environment variable documentation for `ADMIN_NOTIFY_EMAIL`, `DATABASE_URL`, and SendGrid configuration.
 
 ## Final Cleanup
 

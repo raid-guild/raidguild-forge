@@ -126,9 +126,7 @@ export default async function MarketplaceKitPage({ params }: KitPageProps) {
         <div className="container-custom grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
           <div className="max-w-2xl">
             <p className="type-label-sm mb-3 text-moloch-500">Build package</p>
-            <h2 className="type-heading-lg mb-5">
-              A countertop recipe helper for hands-busy cooking.
-            </h2>
+            <h2 className="type-heading-lg mb-5">{item.headline}</h2>
             <p className="type-body-lg text-moloch-800/76">{item.description}</p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">

@@ -14,7 +14,21 @@ const envSiteUrl =
     process.env.VERCEL_URL,
   );
 
-export const siteConfig = {
+type SiteNavItem = {
+  href: string;
+  label: string;
+  external?: boolean;
+};
+
+export const siteConfig: {
+  name: string;
+  title: string;
+  description: string;
+  url: string;
+  ogImage: string;
+  nav: SiteNavItem[];
+  footerNav: SiteNavItem[];
+} = {
   name: "RaidGuild Forge",
   title: "RaidGuild Forge | Autonomous Worlds With Real Machines",
   description:
