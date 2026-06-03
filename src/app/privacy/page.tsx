@@ -15,7 +15,7 @@ const privacySections = [
   },
   {
     title: "Marketplace activity",
-    body: "The Marketplace is not a live checkout flow yet. When wallet connection or x402 payments are added, those flows should keep personal or payment details out of analytics and use the minimum information needed to complete the transaction.",
+    body: "Marketplace checkout uses wallet connection and x402 payments. These flows keep wallet addresses and payment details out of analytics and use the minimum information needed to complete the transaction.",
   },
   {
     title: "Contact",

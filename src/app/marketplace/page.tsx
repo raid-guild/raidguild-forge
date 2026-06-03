@@ -69,7 +69,7 @@ const marketplaceFlow = [
   {
     title: "Purchase access",
     description:
-      "Use license-based purchases, with x402 as the intended payment rail for lightweight marketplace transactions.",
+      "Use license-based purchases, with x402 handling lightweight marketplace transactions.",
     icon: WalletCards,
   },
   {
@@ -272,7 +272,7 @@ export default function MarketplacePage() {
             <div className="absolute bottom-0 left-0 p-6 text-scroll-100">
               <p className="type-label-sm mb-2 text-moloch-300">Checkout</p>
               <p className="type-heading-md max-w-md">
-                Wallet connection, game filters, and x402 purchases will support
+                Wallet connection and x402 purchases now support the first
                 marketplace checkout.
               </p>
             </div>
@@ -323,7 +323,8 @@ export default function MarketplacePage() {
           <div className="max-w-3xl">
             <p className="type-label-sm mb-3 text-moloch-300">Follow marketplace activity</p>
             <h2 className="type-heading-lg mb-4">
-              Get updates when marketplace listings and purchase flows are ready.
+              Get updates when new marketplace listings and purchase flow
+              improvements ship.
             </h2>
             <p className="type-body-lg text-scroll-100/75">
               Marketplace updates are selected by default here.
