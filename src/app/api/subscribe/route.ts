@@ -1,7 +1,11 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 
 import { createConfirmationToken } from "@/lib/subscribe/crypto";
-import { sendConfirmationEmail } from "@/lib/subscribe/email";
+import {
+  escapeHtml,
+  sendAdminNotification,
+  sendConfirmationEmail,
+} from "@/lib/subscribe/email";
 import { normalizePreferences } from "@/lib/subscribe/preferences";
 import { createConfirmation, upsertSubscriber } from "@/lib/subscribe/repository";
 
@@ -111,6 +115,14 @@ export async function POST(request: NextRequest) {
       unsubscribeUrl: unsubscribeUrl.toString(),
     });
 
+    after(() =>
+      notifyAdminOfSubscribe({
+        email: subscriber.email,
+        preferences,
+        source: normalizeSource(body.source),
+      }),
+    );
+
     return NextResponse.json({
       ok: true,
       message: "Confirmation email sent.",
@@ -122,5 +134,50 @@ export async function POST(request: NextRequest) {
       { error: "Something went wrong. Please try again soon." },
       { status: 500 },
     );
+  }
+}
+
+async function notifyAdminOfSubscribe({
+  email,
+  preferences,
+  source,
+}: {
+  email: string;
+  preferences: {
+    learn: boolean;
+    games: boolean;
+    marketplace: boolean;
+  };
+  source?: string;
+}) {
+  const selectedPreferences = Object.entries(preferences)
+    .filter(([, enabled]) => enabled)
+    .map(([key]) => key)
+    .join(", ");
+  const safeEmail = escapeHtml(email);
+  const safePreferences = escapeHtml(selectedPreferences);
+  const safeSource = escapeHtml(source ?? "unknown");
+
+  try {
+    await sendAdminNotification({
+      subject: "New RaidGuild Forge update subscription",
+      textLines: [
+        "Someone requested RaidGuild Forge updates.",
+        "",
+        `Email: ${email}`,
+        `Preferences: ${selectedPreferences}`,
+        `Source: ${source ?? "unknown"}`,
+      ],
+      htmlLines: [
+        "<p>Someone requested RaidGuild Forge updates.</p>",
+        "<ul>",
+        `<li><strong>Email:</strong> ${safeEmail}</li>`,
+        `<li><strong>Preferences:</strong> ${safePreferences}</li>`,
+        `<li><strong>Source:</strong> ${safeSource}</li>`,
+        "</ul>",
+      ],
+    });
+  } catch (error) {
+    console.warn("Admin subscribe notification failed", error);
   }
 }

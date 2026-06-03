@@ -9,7 +9,7 @@ import {
   LoaderCircle,
   WalletCards,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { WalletClient } from "viem";
 import {
   useConnect,
@@ -73,6 +73,7 @@ export function MarketplacePurchasePanel({
     fileName: string;
     url: string;
   } | null>(null);
+  const purchaseNotificationSentRef = useRef(false);
   const [metadataError, setMetadataError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -202,6 +203,17 @@ export function MarketplacePurchasePanel({
         throw new X402PurchaseError(
           await getX402PurchaseErrorMessage(response, details),
         );
+      }
+
+      const purchaseNotificationId = getPurchaseNotificationId(kitSlug);
+
+      if (
+        purchaseNotificationId &&
+        !purchaseNotificationSentRef.current &&
+        !hasPurchaseNotificationBeenSent(kitSlug)
+      ) {
+        purchaseNotificationSentRef.current = true;
+        notifyPurchaseSuccess({ kitSlug, purchaseNotificationId });
       }
 
       const blob = await response.blob();
@@ -381,6 +393,80 @@ function triggerDownload(url: string, fileName: string) {
   document.body.append(anchor);
   anchor.click();
   anchor.remove();
+}
+
+async function notifyPurchaseSuccess({
+  kitSlug,
+  purchaseNotificationId,
+}: {
+  kitSlug: string;
+  purchaseNotificationId: string;
+}) {
+  try {
+    const response = await fetch("/api/marketplace/purchase-notification", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ kitSlug, purchaseNotificationId }),
+    });
+
+    if (response.ok) {
+      markPurchaseNotificationSent(kitSlug);
+    }
+  } catch (error) {
+    console.warn("Purchase notification request failed", error);
+  }
+}
+
+function getPurchaseNotificationId(kitSlug: string) {
+  const key = getPurchaseNotificationStorageKey(kitSlug);
+  const storedId = readBrowserStorageValue(key);
+
+  if (storedId) {
+    return storedId;
+  }
+
+  const nextId =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  writeBrowserStorageValue(key, nextId);
+
+  return nextId;
+}
+
+function hasPurchaseNotificationBeenSent(kitSlug: string) {
+  return readBrowserStorageValue(getPurchaseNotificationSentStorageKey(kitSlug)) === "true";
+}
+
+function markPurchaseNotificationSent(kitSlug: string) {
+  writeBrowserStorageValue(getPurchaseNotificationSentStorageKey(kitSlug), "true");
+}
+
+function getPurchaseNotificationStorageKey(kitSlug: string) {
+  return `forge:purchase-notification-id:${kitSlug}`;
+}
+
+function getPurchaseNotificationSentStorageKey(kitSlug: string) {
+  return `forge:purchase-notification-sent:${kitSlug}`;
+}
+
+function readBrowserStorageValue(key: string) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeBrowserStorageValue(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // If storage is unavailable, the in-memory ref still prevents repeats during this render session.
+  }
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
