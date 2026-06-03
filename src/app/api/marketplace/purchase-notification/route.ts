@@ -11,9 +11,20 @@ type PurchaseNotificationRequestBody = {
 };
 
 const purchaseNotificationIdPattern = /^[a-zA-Z0-9_-]{8,80}$/;
+const rateLimitWindowMs = 10 * 60 * 1000;
+const maxRequestsPerWindow = 5;
+const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
 
 export async function POST(request: Request) {
   let body: PurchaseNotificationRequestBody;
+
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Invalid request." }, { status: 403 });
+  }
+
+  if (isRateLimited(request)) {
+    return NextResponse.json({ error: "Too many requests." }, { status: 429 });
+  }
 
   try {
     body = await request.json();
@@ -83,6 +94,41 @@ export async function POST(request: Request) {
   });
 
   return response;
+}
+
+function isSameOriginRequest(request: Request) {
+  const origin = request.headers.get("origin");
+
+  if (!origin) {
+    return false;
+  }
+
+  return origin === new URL(request.url).origin;
+}
+
+function isRateLimited(request: Request) {
+  const key = getRateLimitKey(request);
+  const now = Date.now();
+  const bucket = rateLimitBuckets.get(key);
+
+  if (!bucket || bucket.resetAt <= now) {
+    rateLimitBuckets.set(key, {
+      count: 1,
+      resetAt: now + rateLimitWindowMs,
+    });
+    return false;
+  }
+
+  bucket.count += 1;
+
+  return bucket.count > maxRequestsPerWindow;
+}
+
+function getRateLimitKey(request: Request) {
+  const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const realIp = request.headers.get("x-real-ip");
+
+  return forwardedFor ?? realIp ?? "unknown";
 }
 
 function getNotificationCookieName(slug: string) {

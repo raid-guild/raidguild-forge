@@ -213,7 +213,6 @@ export function MarketplacePurchasePanel({
         !hasPurchaseNotificationBeenSent(kitSlug)
       ) {
         purchaseNotificationSentRef.current = true;
-        markPurchaseNotificationSent(kitSlug);
         notifyPurchaseSuccess({ kitSlug, purchaseNotificationId });
       }
 
@@ -396,22 +395,28 @@ function triggerDownload(url: string, fileName: string) {
   anchor.remove();
 }
 
-function notifyPurchaseSuccess({
+async function notifyPurchaseSuccess({
   kitSlug,
   purchaseNotificationId,
 }: {
   kitSlug: string;
   purchaseNotificationId: string;
 }) {
-  void fetch("/api/marketplace/purchase-notification", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({ kitSlug, purchaseNotificationId }),
-  }).catch((error) => {
+  try {
+    const response = await fetch("/api/marketplace/purchase-notification", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ kitSlug, purchaseNotificationId }),
+    });
+
+    if (response.ok) {
+      markPurchaseNotificationSent(kitSlug);
+    }
+  } catch (error) {
     console.warn("Purchase notification request failed", error);
-  });
+  }
 }
 
 function getPurchaseNotificationId(kitSlug: string) {

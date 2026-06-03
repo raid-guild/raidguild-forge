@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 
 import { createConfirmationToken } from "@/lib/subscribe/crypto";
 import {
@@ -115,11 +115,13 @@ export async function POST(request: NextRequest) {
       unsubscribeUrl: unsubscribeUrl.toString(),
     });
 
-    notifyAdminOfSubscribe({
-      email: subscriber.email,
-      preferences,
-      source: normalizeSource(body.source),
-    });
+    after(() =>
+      notifyAdminOfSubscribe({
+        email: subscriber.email,
+        preferences,
+        source: normalizeSource(body.source),
+      }),
+    );
 
     return NextResponse.json({
       ok: true,
@@ -135,7 +137,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function notifyAdminOfSubscribe({
+async function notifyAdminOfSubscribe({
   email,
   preferences,
   source,
@@ -156,24 +158,26 @@ function notifyAdminOfSubscribe({
   const safePreferences = escapeHtml(selectedPreferences);
   const safeSource = escapeHtml(source ?? "unknown");
 
-  void sendAdminNotification({
-    subject: "New RaidGuild Forge update subscription",
-    textLines: [
-      "Someone requested RaidGuild Forge updates.",
-      "",
-      `Email: ${email}`,
-      `Preferences: ${selectedPreferences}`,
-      `Source: ${source ?? "unknown"}`,
-    ],
-    htmlLines: [
-      "<p>Someone requested RaidGuild Forge updates.</p>",
-      "<ul>",
-      `<li><strong>Email:</strong> ${safeEmail}</li>`,
-      `<li><strong>Preferences:</strong> ${safePreferences}</li>`,
-      `<li><strong>Source:</strong> ${safeSource}</li>`,
-      "</ul>",
-    ],
-  }).catch((error) => {
+  try {
+    await sendAdminNotification({
+      subject: "New RaidGuild Forge update subscription",
+      textLines: [
+        "Someone requested RaidGuild Forge updates.",
+        "",
+        `Email: ${email}`,
+        `Preferences: ${selectedPreferences}`,
+        `Source: ${source ?? "unknown"}`,
+      ],
+      htmlLines: [
+        "<p>Someone requested RaidGuild Forge updates.</p>",
+        "<ul>",
+        `<li><strong>Email:</strong> ${safeEmail}</li>`,
+        `<li><strong>Preferences:</strong> ${safePreferences}</li>`,
+        `<li><strong>Source:</strong> ${safeSource}</li>`,
+        "</ul>",
+      ],
+    });
+  } catch (error) {
     console.warn("Admin subscribe notification failed", error);
-  });
+  }
 }
