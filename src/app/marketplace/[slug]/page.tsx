@@ -82,24 +82,21 @@ export default async function MarketplaceKitPage({ params }: KitPageProps) {
             <p className="type-body-lg mt-6 max-w-3xl text-moloch-800/78">
               {item.summary}
             </p>
+            <div className="mt-10">
+              <div className="relative min-h-[17rem] overflow-hidden border border-moloch-800/15 bg-moloch-800 shadow-[10px_10px_0_rgba(83,74,19,0.14)] sm:min-h-[24rem] lg:min-h-[28rem]">
+                <Image
+                  src={item.image}
+                  alt=""
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(min-width: 1024px) 58vw, 100vw"
+                />
+              </div>
+            </div>
           </div>
 
           <MarketplacePurchasePanel endpoint={item.x402Endpoint} kitSlug={item.slug} />
-        </div>
-      </section>
-
-      <section className="border-b border-moloch-800/15 py-12 md:py-18">
-        <div className="container-custom">
-          <div className="relative min-h-[20rem] overflow-hidden border border-moloch-800/15 bg-moloch-800 shadow-[10px_10px_0_rgba(83,74,19,0.14)] md:min-h-[34rem]">
-            <Image
-              src={item.image}
-              alt=""
-              fill
-              priority
-              className="object-cover"
-              sizes="100vw"
-            />
-          </div>
         </div>
       </section>
 

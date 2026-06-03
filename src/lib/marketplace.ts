@@ -73,8 +73,9 @@ export const marketplaceItems: MarketplaceItem[] = [
       },
       {
         label: "Build log",
-        description: "A longer writeup will be linked here after publication.",
-        status: "Coming soon",
+        description:
+          "Published walkthrough for the DIY cooking companion, including the project context and build process.",
+        href: "https://paragraph.com/@raidguild-forge/diy-cooking-companion",
       },
     ],
   },
