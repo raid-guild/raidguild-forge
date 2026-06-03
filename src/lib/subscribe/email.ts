@@ -7,7 +7,7 @@ function getRequiredEnv(name: string) {
   const value = process.env[name];
 
   if (!value) {
-    throw new Error(`${name} is required for subscribe confirmation emails.`);
+    throw new Error(`${name} is required for SendGrid email delivery.`);
   }
 
   return value;
