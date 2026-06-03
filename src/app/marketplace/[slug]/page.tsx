@@ -3,7 +3,6 @@ import {
   ArrowUpRight,
   Box,
   CheckCircle2,
-  FileArchive,
   ShieldCheck,
   Wrench,
 } from "lucide-react";
@@ -13,6 +12,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { MarketplaceKitViewAnalytics } from "@/components/marketplace-kit-view-analytics";
+import { MarketplacePurchasePanel } from "@/components/marketplace-purchase-panel";
 import { TrackLink } from "@/components/track-link";
 import { Button } from "@/components/ui/button";
 import { analyticsEvents } from "@/lib/analytics";
@@ -84,26 +84,7 @@ export default async function MarketplaceKitPage({ params }: KitPageProps) {
             </p>
           </div>
 
-          <aside className="min-w-0 border border-moloch-800/15 bg-scroll-100 p-5 shadow-[8px_8px_0_rgba(41,16,10,0.08)]">
-            <div className="mb-5 flex size-11 items-center justify-center rounded-md bg-moloch-500 text-scroll-100">
-              <FileArchive aria-hidden="true" size={22} strokeWidth={1.8} />
-            </div>
-            <p className="type-label-sm mb-2 text-moloch-500">Access</p>
-            <h2 className="type-heading-md mb-3">Listed for gated download.</h2>
-            <p className="type-body-md mb-5 text-moloch-800/72">
-              This build package is prepared for license-based access through
-              the configured x402 endpoint. The current listing lets builders
-              inspect the package, license, attribution, and reference materials.
-            </p>
-            <div className="grid gap-3 border-y border-moloch-800/12 py-4">
-              <InfoRow label="Payment rail" value="x402" />
-              <InfoRow label="Download type" value="ZIP build package" />
-              <InfoRow label="Endpoint" value="Configured" />
-            </div>
-            <p className="mt-4 break-all font-mono text-sm leading-6 text-moloch-800/54">
-              {item.x402Endpoint}
-            </p>
-          </aside>
+          <MarketplacePurchasePanel endpoint={item.x402Endpoint} kitSlug={item.slug} />
         </div>
       </section>
 
@@ -263,14 +244,5 @@ export default async function MarketplaceKitPage({ params }: KitPageProps) {
         </div>
       </section>
     </>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <p className="type-label-sm text-moloch-800/55">{label}</p>
-      <p className="type-body-md text-right text-moloch-800/78">{value}</p>
-    </div>
   );
 }

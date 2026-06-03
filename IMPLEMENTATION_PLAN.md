@@ -26,9 +26,9 @@ Definition of done:
 
 ### PR B: Wallet + x402 Purchase Flow
 
-Status: planned
+Status: in progress
 
-- Add `wagmi`, `viem`, and the selected x402 client package.
+- Add `wagmi`, `viem`, `@x402/fetch`, `@x402/evm`, and `@x402/core`.
 - Add marketplace-level wallet connection/status.
 - Fetch x402 metadata from the Pinata endpoint.
 - Show tucked-away payment details on the kit page.

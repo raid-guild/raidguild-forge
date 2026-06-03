@@ -48,7 +48,7 @@ export const marketplaceItems: MarketplaceItem[] = [
       "Buyers may build, modify, and remix the kit for personal use with attribution. The files may not be resold, rehosted, redistributed, or used to sell physical kits.",
     x402Endpoint:
       "https://charactersheets.mypinata.cloud/x402/cid/bafkreiheg4lc4ac3enc56euffz6obgrrtqw2iyni3vc35fvzwyfzroq5ti",
-    primaryCta: "View kit files",
+    primaryCta: "Buy Kit Files",
     contents: [
       "Parts shopping list",
       "Build and wiring notes",
