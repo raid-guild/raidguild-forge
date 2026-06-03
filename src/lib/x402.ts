@@ -75,14 +75,17 @@ export async function fetchX402Metadata(endpoint: string): Promise<X402Metadata>
 }
 
 export function getPreferredPaymentOption(metadata: X402Metadata) {
-  return metadata.accepts[0];
+  return (
+    metadata.accepts.find(
+      (option) => option.scheme === "exact" && option.network === "eip155:8453",
+    ) ?? metadata.accepts[0]
+  );
 }
 
 export function getX402DisplayDetails(
   metadata: X402Metadata,
+  paymentOption = getPreferredPaymentOption(metadata),
 ): X402DisplayDetails | null {
-  const paymentOption = getPreferredPaymentOption(metadata);
-
   if (!paymentOption) {
     return null;
   }
@@ -190,12 +193,25 @@ function formatAmount(paymentOption: X402PaymentOption) {
     return paymentOption.amount;
   }
 
-  const amount = Number(paymentOption.amount) / 10 ** decimals;
+  if (!/^\d+$/.test(paymentOption.amount)) {
+    return paymentOption.amount;
+  }
 
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: decimals,
-    minimumFractionDigits: amount % 1 === 0 ? 2 : 0,
-  }).format(amount);
+  const wholeUnits = BigInt(paymentOption.amount);
+  const divisor = BigInt(10) ** BigInt(decimals);
+  const wholePart = wholeUnits / divisor;
+  const fractionalPart = wholeUnits % divisor;
+  const fractionalDigits = fractionalPart
+    .toString()
+    .padStart(decimals, "0")
+    .replace(/0+$/, "");
+  const formattedWholePart = new Intl.NumberFormat("en-US").format(wholePart);
+
+  if (!fractionalDigits) {
+    return `${formattedWholePart}.00`;
+  }
+
+  return `${formattedWholePart}.${fractionalDigits}`;
 }
 
 function formatAssetLabel(paymentOption: X402PaymentOption) {
@@ -281,7 +297,6 @@ function getReadableErrorMessage(text: string) {
     "errorReason",
     "message",
     "reason",
-    "resource",
     "detail",
     "details",
     "cause",
@@ -308,11 +323,12 @@ function getReadableErrorFromPayload(payload: unknown) {
     "errorMessage",
     "message",
     "reason",
-    "resource",
   ]);
 
   return (
-    message ?? "Payment details could not be loaded from the x402 endpoint."
+    message && isUsefulErrorMessage(message)
+      ? message
+      : "Payment details could not be loaded from the x402 endpoint."
   );
 }
 
@@ -373,6 +389,9 @@ function isUsefulErrorMessage(message: string | null | undefined) {
     normalized.length > 3 &&
     normalized !== "exact" &&
     normalized !== "false" &&
-    normalized !== "true"
+    normalized !== "true" &&
+    !normalized.startsWith("http://") &&
+    !normalized.startsWith("https://") &&
+    !normalized.includes("/")
   );
 }

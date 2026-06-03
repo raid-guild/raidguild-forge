@@ -18,6 +18,7 @@ export async function GET(request: Request) {
   try {
     const response = await fetch(endpoint, {
       cache: "no-store",
+      signal: AbortSignal.timeout(10_000),
       headers: {
         accept: "application/json",
       },

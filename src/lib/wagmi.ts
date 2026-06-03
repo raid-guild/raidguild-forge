@@ -1,5 +1,6 @@
-import { createConfig, http, injected } from "wagmi";
 import { base } from "viem/chains";
+import { createConfig, http } from "wagmi";
+import { injected } from "wagmi/connectors";
 
 export const wagmiConfig = createConfig({
   chains: [base],

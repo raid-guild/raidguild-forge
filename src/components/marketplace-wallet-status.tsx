@@ -2,19 +2,23 @@
 
 import { WalletCards } from "lucide-react";
 import { useState } from "react";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { useConnect, useConnection, useDisconnect } from "wagmi";
 
 import { Button } from "@/components/ui/button";
 import { analyticsEvents, trackEvent } from "@/lib/analytics";
 import { marketplacePaymentChain } from "@/lib/wagmi";
-import { getPreferredWalletConnector } from "@/lib/wallet";
+import {
+  getPreferredWalletConnector,
+  getWalletErrorMessage,
+  withWalletTimeout,
+} from "@/lib/wallet";
 
 type MarketplaceWalletStatusProps = {
   location: string;
 };
 
 export function MarketplaceWalletStatus({ location }: MarketplaceWalletStatusProps) {
-  const { address, chainId, isConnected } = useAccount();
+  const { address, chainId, isConnected } = useConnection();
   const { connectAsync, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +39,7 @@ export function MarketplaceWalletStatus({ location }: MarketplaceWalletStatusPro
 
     try {
       setIsConnecting(true);
-      await withTimeout(
+      await withWalletTimeout(
         connectAsync({ connector }),
         `${connector.name} did not respond. Check for an open wallet prompt and try again.`,
       );
@@ -95,40 +99,4 @@ export function MarketplaceWalletStatus({ location }: MarketplaceWalletStatusPro
 
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
-
-async function withTimeout<T>(promise: Promise<T>, timeoutMessage: string) {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<never>((_, reject) => {
-        timeoutId = setTimeout(() => reject(new Error(timeoutMessage)), 90000);
-      }),
-    ]);
-  } finally {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-  }
-}
-
-function getWalletErrorMessage(error: unknown, fallback: string) {
-  if (!(error instanceof Error) || !error.message) {
-    return fallback;
-  }
-
-  if (error.message.includes("Provider not found")) {
-    return "No browser wallet was detected.";
-  }
-
-  if (
-    error.message.toLowerCase().includes("user rejected") ||
-    error.message.toLowerCase().includes("user denied")
-  ) {
-    return "Wallet connection was cancelled.";
-  }
-
-  return error.message;
 }

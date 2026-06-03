@@ -12,8 +12,8 @@ import {
 import { useEffect, useState } from "react";
 import type { WalletClient } from "viem";
 import {
-  useAccount,
   useConnect,
+  useConnection,
   useReadContract,
   useSwitchChain,
   useWalletClient,
@@ -22,10 +22,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { analyticsEvents, trackEvent } from "@/lib/analytics";
 import { marketplacePaymentChain, marketplacePaymentNetwork } from "@/lib/wagmi";
-import { getPreferredWalletConnector } from "@/lib/wallet";
+import {
+  getPreferredWalletConnector,
+  getWalletErrorMessage as getSharedWalletErrorMessage,
+  withWalletTimeout,
+} from "@/lib/wallet";
 import {
   fetchX402Metadata,
   getDownloadFileName,
+  getPreferredPaymentOption,
   getX402PurchaseErrorMessage,
   getX402DisplayDetails,
   X402PurchaseError,
@@ -54,7 +59,7 @@ export function MarketplacePurchasePanel({
   endpoint,
   kitSlug,
 }: MarketplacePurchasePanelProps) {
-  const { address, chainId, isConnected } = useAccount();
+  const { address, chainId, isConnected } = useConnection();
   const { connectAsync, connectors } = useConnect();
   const { switchChainAsync } = useSwitchChain();
   const { data: walletClient } = useWalletClient({ chainId: marketplacePaymentChain.id });
@@ -72,7 +77,7 @@ export function MarketplacePurchasePanel({
   const [error, setError] = useState<string | null>(null);
 
   const isWrongNetwork = isConnected && chainId !== marketplacePaymentChain.id;
-  const paymentOption = metadata?.accepts[0];
+  const paymentOption = metadata ? getPreferredPaymentOption(metadata) : undefined;
   const requiredAmount = getRequiredAmount(paymentOption?.amount);
   const assetAddress = getAssetAddress(paymentOption?.asset);
   const shouldReadBalance =
@@ -164,7 +169,7 @@ export function MarketplacePurchasePanel({
         }
 
         setPurchaseState("connecting");
-        await withTimeout(
+        await withWalletTimeout(
           connectAsync({ connector }),
           `${connector.name} did not respond. Check for an open wallet prompt and try again.`,
         );
@@ -174,7 +179,7 @@ export function MarketplacePurchasePanel({
 
       if (isWrongNetwork) {
         setPurchaseState("switching");
-        await withTimeout(
+        await withWalletTimeout(
           switchChainAsync({ chainId: marketplacePaymentChain.id }),
           "Network switch timed out. Check your wallet extension and try again.",
         );
@@ -350,7 +355,7 @@ function createPaymentFetch(walletClient: WalletClient, address: string) {
       }),
   };
 
-  const client = new x402Client((x402Version, paymentRequirements) => {
+  const client = new x402Client((_x402Version, paymentRequirements) => {
     const preferred = paymentRequirements.find(
       (option) =>
         option.scheme === "exact" && option.network === marketplacePaymentNetwork,
@@ -508,42 +513,10 @@ function getInsufficientBalanceMessage(details: X402DisplayDetails) {
   return `Your connected wallet needs at least ${details.paymentLabel} on ${details.networkLabel} to buy this kit.`;
 }
 
-async function withTimeout<T>(promise: Promise<T>, timeoutMessage: string) {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<never>((_, reject) => {
-        timeoutId = setTimeout(() => reject(new Error(timeoutMessage)), 90000);
-      }),
-    ]);
-  } finally {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-  }
-}
-
 function getWalletErrorMessage(error: unknown, fallback: string) {
-  if (!(error instanceof Error) || !error.message) {
-    return fallback;
-  }
-
   if (error instanceof X402PurchaseError) {
     return error.message;
   }
 
-  if (error.message.includes("Provider not found")) {
-    return "No browser wallet was detected.";
-  }
-
-  if (
-    error.message.toLowerCase().includes("user rejected") ||
-    error.message.toLowerCase().includes("user denied")
-  ) {
-    return "Wallet request was cancelled.";
-  }
-
-  return error.message;
+  return getSharedWalletErrorMessage(error, fallback);
 }
