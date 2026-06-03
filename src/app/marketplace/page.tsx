@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
+import { MarketplaceWalletStatus } from "@/components/marketplace-wallet-status";
 import { StayUpdatedButton } from "@/components/stay-updated-button";
 import { TrackLink } from "@/components/track-link";
 import { analyticsEvents } from "@/lib/analytics";
@@ -95,10 +96,13 @@ export default function MarketplacePage() {
                 Forge projects move useful creations into builder inventory.
               </p>
             </div>
-            <div className="grid gap-2 sm:flex sm:flex-wrap lg:justify-end">
-              <DashboardMetric label="Listings" value={`${marketplaceItems.length}`} />
-              <DashboardMetric label="Type" value="Physical kits" />
-              <DashboardMetric label="Access" value="x402" />
+            <div className="grid gap-3 sm:min-w-80">
+              <MarketplaceWalletStatus location="marketplace_header" />
+              <div className="grid gap-2 sm:flex sm:flex-wrap lg:justify-end">
+                <DashboardMetric label="Listings" value={`${marketplaceItems.length}`} />
+                <DashboardMetric label="Type" value="Physical kits" />
+                <DashboardMetric label="Access" value="x402" />
+              </div>
             </div>
           </div>
         </div>

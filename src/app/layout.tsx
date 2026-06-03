@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { Web3Providers } from "@/components/web3-providers";
 import { ebGaramond, maziusDisplay, maziusReview } from "@/lib/fonts";
 import { siteConfig } from "@/lib/site";
 
@@ -55,11 +56,13 @@ export default function RootLayout({
       <body
         className={`${maziusDisplay.variable} ${maziusReview.variable} ${ebGaramond.variable} antialiased`}
       >
-        <div className="flex min-h-screen flex-col">
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
-        </div>
+        <Web3Providers>
+          <div className="flex min-h-screen flex-col">
+            <SiteHeader />
+            <main className="flex-1">{children}</main>
+            <SiteFooter />
+          </div>
+        </Web3Providers>
         <Analytics />
       </body>
     </html>
