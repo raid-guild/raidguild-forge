@@ -18,10 +18,54 @@ type SubscribeRequestBody = {
     games?: unknown;
     marketplace?: unknown;
   };
+  projectInterests?: unknown;
   source?: unknown;
 };
 
+const allowedProjectInterests = new Set(["titan-racers"]);
+const defaultAllowedOrigins = ["https://titanracers.com"];
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function getAllowedOrigins() {
+  const configuredOrigins = process.env.SUBSCRIBE_ALLOWED_ORIGINS?.split(",") ?? [];
+
+  return new Set(
+    [...defaultAllowedOrigins, ...configuredOrigins]
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+  );
+}
+
+function getCorsHeaders(request: NextRequest) {
+  const origin = request.headers.get("origin");
+
+  if (!origin || !getAllowedOrigins().has(origin)) {
+    return null;
+  }
+
+  return {
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Origin": origin,
+    Vary: "Origin",
+  };
+}
+
+function jsonResponse(
+  request: NextRequest,
+  body: Record<string, unknown>,
+  init?: ResponseInit,
+) {
+  const corsHeaders = getCorsHeaders(request);
+
+  return NextResponse.json(body, {
+    ...init,
+    headers: {
+      ...corsHeaders,
+      ...init?.headers,
+    },
+  });
+}
 
 function getOrigin(request: NextRequest) {
   return (
@@ -37,6 +81,34 @@ function normalizeSource(source: unknown) {
   }
 
   return source.replace(/[^a-z0-9_-]/gi, "").slice(0, 48) || undefined;
+}
+
+function parseProjectInterests(input: unknown) {
+  if (input === undefined) {
+    return [];
+  }
+
+  if (!Array.isArray(input)) {
+    return null;
+  }
+
+  const projectInterests = new Set<string>();
+
+  for (const value of input) {
+    if (typeof value !== "string") {
+      return null;
+    }
+
+    const slug = value.trim().toLowerCase();
+
+    if (!allowedProjectInterests.has(slug)) {
+      return null;
+    }
+
+    projectInterests.add(slug);
+  }
+
+  return [...projectInterests];
 }
 
 function parsePreferences(input: unknown) {
@@ -65,27 +137,67 @@ function parsePreferences(input: unknown) {
   return normalizePreferences(parsed);
 }
 
+export function OPTIONS(request: NextRequest) {
+  const corsHeaders = getCorsHeaders(request);
+
+  if (!corsHeaders) {
+    return new Response(null, { status: 204 });
+  }
+
+  return new Response(null, {
+    headers: corsHeaders,
+    status: 204,
+  });
+}
+
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get("origin");
+
+  if (origin && !getAllowedOrigins().has(origin)) {
+    return jsonResponse(request, { error: "Origin not allowed." }, { status: 403 });
+  }
+
   let body: SubscribeRequestBody;
 
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    return jsonResponse(request, { error: "Invalid request." }, { status: 400 });
   }
 
   if (typeof body.email !== "string" || !emailPattern.test(body.email.trim())) {
-    return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
+    return jsonResponse(
+      request,
+      { error: "Enter a valid email address." },
+      { status: 400 },
+    );
   }
 
-  const preferences = parsePreferences(body.preferences);
+  const projectInterests = parseProjectInterests(body.projectInterests);
+
+  if (!projectInterests) {
+    return jsonResponse(request, { error: "Invalid request." }, { status: 400 });
+  }
+
+  const hasExplicitPreferences = body.preferences !== undefined;
+  const preferences = parsePreferences(
+    hasExplicitPreferences || projectInterests.length === 0
+      ? body.preferences
+      : { learn: false, games: false, marketplace: false },
+  );
 
   if (!preferences) {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    return jsonResponse(request, { error: "Invalid request." }, { status: 400 });
   }
 
-  if (!preferences.learn && !preferences.games && !preferences.marketplace) {
-    return NextResponse.json(
+  if (
+    !preferences.learn &&
+    !preferences.games &&
+    !preferences.marketplace &&
+    projectInterests.length === 0
+  ) {
+    return jsonResponse(
+      request,
       { error: "Choose at least one update category." },
       { status: 400 },
     );
@@ -96,6 +208,8 @@ export async function POST(request: NextRequest) {
     const subscriber = await upsertSubscriber({
       email: body.email,
       preferences,
+      shouldUpdatePreferences: hasExplicitPreferences || projectInterests.length === 0,
+      projectInterests,
       source: normalizeSource(body.source),
       unsubscribeToken,
     });
@@ -119,18 +233,20 @@ export async function POST(request: NextRequest) {
       notifyAdminOfSubscribe({
         email: subscriber.email,
         preferences,
+        projectInterests,
         source: normalizeSource(body.source),
       }),
     );
 
-    return NextResponse.json({
+    return jsonResponse(request, {
       ok: true,
       message: "Confirmation email sent.",
     });
   } catch (error) {
     console.error("Subscribe request failed", error);
 
-    return NextResponse.json(
+    return jsonResponse(
+      request,
       { error: "Something went wrong. Please try again soon." },
       { status: 500 },
     );
@@ -140,6 +256,7 @@ export async function POST(request: NextRequest) {
 async function notifyAdminOfSubscribe({
   email,
   preferences,
+  projectInterests,
   source,
 }: {
   email: string;
@@ -148,14 +265,17 @@ async function notifyAdminOfSubscribe({
     games: boolean;
     marketplace: boolean;
   };
+  projectInterests: string[];
   source?: string;
 }) {
   const selectedPreferences = Object.entries(preferences)
     .filter(([, enabled]) => enabled)
     .map(([key]) => key)
     .join(", ");
+  const selectedProjects = projectInterests.join(", ") || "none";
   const safeEmail = escapeHtml(email);
-  const safePreferences = escapeHtml(selectedPreferences);
+  const safePreferences = escapeHtml(selectedPreferences || "none");
+  const safeProjects = escapeHtml(selectedProjects);
   const safeSource = escapeHtml(source ?? "unknown");
 
   try {
@@ -165,7 +285,8 @@ async function notifyAdminOfSubscribe({
         "Someone requested RaidGuild Forge updates.",
         "",
         `Email: ${email}`,
-        `Preferences: ${selectedPreferences}`,
+        `Preferences: ${selectedPreferences || "none"}`,
+        `Project interests: ${selectedProjects}`,
         `Source: ${source ?? "unknown"}`,
       ],
       htmlLines: [
@@ -173,6 +294,7 @@ async function notifyAdminOfSubscribe({
         "<ul>",
         `<li><strong>Email:</strong> ${safeEmail}</li>`,
         `<li><strong>Preferences:</strong> ${safePreferences}</li>`,
+        `<li><strong>Project interests:</strong> ${safeProjects}</li>`,
         `<li><strong>Source:</strong> ${safeSource}</li>`,
         "</ul>",
       ],
