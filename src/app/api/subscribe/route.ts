@@ -12,6 +12,7 @@ import { createConfirmation, upsertSubscriber } from "@/lib/subscribe/repository
 export const runtime = "nodejs";
 
 type SubscribeRequestBody = {
+  confirmationOrigin?: unknown;
   email?: unknown;
   preferences?: {
     learn?: unknown;
@@ -85,6 +86,32 @@ function normalizeSource(source: unknown) {
   }
 
   return source.replace(/[^a-z0-9_-]/gi, "").slice(0, 48) || undefined;
+}
+
+function parseConfirmationOrigin(input: unknown, request: NextRequest) {
+  if (input === undefined) {
+    return undefined;
+  }
+
+  if (typeof input !== "string") {
+    return null;
+  }
+
+  try {
+    const url = new URL(input.trim());
+
+    if (!["http:", "https:"].includes(url.protocol)) {
+      return null;
+    }
+
+    if (!getAllowedOrigins(request).has(url.origin)) {
+      return null;
+    }
+
+    return url.origin;
+  } catch {
+    return null;
+  }
 }
 
 function parseProjectInterests(input: unknown) {
@@ -189,6 +216,15 @@ export async function POST(request: NextRequest) {
     return jsonResponse(request, { error: "Invalid request." }, { status: 400 });
   }
 
+  const confirmationOrigin = parseConfirmationOrigin(
+    body.confirmationOrigin,
+    request,
+  );
+
+  if (confirmationOrigin === null) {
+    return jsonResponse(request, { error: "Invalid request." }, { status: 400 });
+  }
+
   const hasExplicitPreferences = body.preferences !== undefined;
   const preferences = parsePreferences(
     hasExplicitPreferences || projectInterests.length === 0
@@ -227,7 +263,10 @@ export async function POST(request: NextRequest) {
     const token = createConfirmationToken();
     await createConfirmation({ subscriberId: subscriber.id, token });
 
-    const confirmationUrl = new URL("/subscribe/confirm", getOrigin(request));
+    const confirmationUrl = new URL(
+      "/subscribe/confirm",
+      confirmationOrigin ?? getOrigin(request),
+    );
     confirmationUrl.searchParams.set("token", token);
 
     const unsubscribeUrl = new URL("/subscribe/unsubscribe", getOrigin(request));
@@ -295,7 +334,7 @@ async function notifyAdminOfSubscribe({
         "Someone requested RaidGuild Forge updates.",
         "",
         `Email: ${email}`,
-        `Preferences: ${selectedPreferences || "none"}`,
+        `Requested preferences: ${selectedPreferences || "none"}`,
         `Project interests: ${selectedProjects}`,
         `Source: ${source ?? "unknown"}`,
       ],
@@ -303,7 +342,7 @@ async function notifyAdminOfSubscribe({
         "<p>Someone requested RaidGuild Forge updates.</p>",
         "<ul>",
         `<li><strong>Email:</strong> ${safeEmail}</li>`,
-        `<li><strong>Preferences:</strong> ${safePreferences}</li>`,
+        `<li><strong>Requested preferences:</strong> ${safePreferences}</li>`,
         `<li><strong>Project interests:</strong> ${safeProjects}</li>`,
         `<li><strong>Source:</strong> ${safeSource}</li>`,
         "</ul>",
