@@ -26,11 +26,19 @@ const allowedProjectInterests = new Set(["titan-racers"]);
 const defaultAllowedOrigins = ["https://titanracers.com"];
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function getAllowedOrigins() {
+function getOrigin(request: NextRequest) {
+  return (
+    process.env.SITE_URL ??
+    process.env.VERCEL_PROJECT_PRODUCTION_URL?.replace(/^/, "https://") ??
+    request.nextUrl.origin
+  );
+}
+
+function getAllowedOrigins(request: NextRequest) {
   const configuredOrigins = process.env.SUBSCRIBE_ALLOWED_ORIGINS?.split(",") ?? [];
 
   return new Set(
-    [...defaultAllowedOrigins, ...configuredOrigins]
+    [getOrigin(request), ...defaultAllowedOrigins, ...configuredOrigins]
       .map((origin) => origin.trim())
       .filter(Boolean),
   );
@@ -39,7 +47,7 @@ function getAllowedOrigins() {
 function getCorsHeaders(request: NextRequest) {
   const origin = request.headers.get("origin");
 
-  if (!origin || !getAllowedOrigins().has(origin)) {
+  if (!origin || !getAllowedOrigins(request).has(origin)) {
     return null;
   }
 
@@ -57,22 +65,18 @@ function jsonResponse(
   init?: ResponseInit,
 ) {
   const corsHeaders = getCorsHeaders(request);
+  const headers = new Headers(init?.headers);
+
+  if (corsHeaders) {
+    for (const [key, value] of Object.entries(corsHeaders)) {
+      headers.set(key, value);
+    }
+  }
 
   return NextResponse.json(body, {
     ...init,
-    headers: {
-      ...corsHeaders,
-      ...init?.headers,
-    },
+    headers,
   });
-}
-
-function getOrigin(request: NextRequest) {
-  return (
-    process.env.SITE_URL ??
-    process.env.VERCEL_PROJECT_PRODUCTION_URL?.replace(/^/, "https://") ??
-    request.nextUrl.origin
-  );
 }
 
 function normalizeSource(source: unknown) {
@@ -153,17 +157,23 @@ export function OPTIONS(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
 
-  if (origin && !getAllowedOrigins().has(origin)) {
+  if (origin && !getAllowedOrigins(request).has(origin)) {
     return jsonResponse(request, { error: "Origin not allowed." }, { status: 403 });
   }
 
-  let body: SubscribeRequestBody;
+  let rawBody: unknown;
 
   try {
-    body = await request.json();
+    rawBody = await request.json();
   } catch {
     return jsonResponse(request, { error: "Invalid request." }, { status: 400 });
   }
+
+  if (typeof rawBody !== "object" || rawBody === null || Array.isArray(rawBody)) {
+    return jsonResponse(request, { error: "Invalid request." }, { status: 400 });
+  }
+
+  const body = rawBody as SubscribeRequestBody;
 
   if (typeof body.email !== "string" || !emailPattern.test(body.email.trim())) {
     return jsonResponse(

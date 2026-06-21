@@ -76,23 +76,22 @@ export async function upsertSubscriber({
   }
 
   if (projectInterests?.length) {
-    for (const projectSlug of projectInterests) {
-      await query(
-        `
-          insert into subscriber_project_interests (
-            subscriber_id,
-            project_slug,
-            source,
-            updated_at
-          )
-          values ($1, $2, $3, now())
-          on conflict (subscriber_id, project_slug) do update
-          set source = coalesce(excluded.source, subscriber_project_interests.source),
-              updated_at = now()
-        `,
-        [subscriber.id, projectSlug, source ?? null],
-      );
-    }
+    await query(
+      `
+        insert into subscriber_project_interests (
+          subscriber_id,
+          project_slug,
+          source,
+          updated_at
+        )
+        select $1, project_slug, $3, now()
+        from unnest($2::text[]) as project_slug
+        on conflict (subscriber_id, project_slug) do update
+        set source = coalesce(excluded.source, subscriber_project_interests.source),
+            updated_at = now()
+      `,
+      [subscriber.id, projectInterests, source ?? null],
+    );
   }
 
   return {
