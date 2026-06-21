@@ -14,11 +14,15 @@ type SubscriberRow = {
 export async function upsertSubscriber({
   email,
   preferences,
+  shouldUpdatePreferences = true,
   source,
+  projectInterests,
   unsubscribeToken,
 }: {
   email: string;
   preferences: SubscriberPreferences;
+  shouldUpdatePreferences?: boolean;
+  projectInterests?: string[];
   source?: string;
   unsubscribeToken: string;
 }) {
@@ -47,18 +51,48 @@ export async function upsertSubscriber({
 
   const subscriber = subscriberResult.rows[0];
 
-  await query(
-    `
-      insert into subscriber_preferences (subscriber_id, learn, games, marketplace, updated_at)
-      values ($1, $2, $3, $4, now())
-      on conflict (subscriber_id) do update
-      set learn = excluded.learn,
-          games = excluded.games,
-          marketplace = excluded.marketplace,
-          updated_at = now()
-    `,
-    [subscriber.id, preferences.learn, preferences.games, preferences.marketplace],
-  );
+  if (shouldUpdatePreferences) {
+    await query(
+      `
+        insert into subscriber_preferences (subscriber_id, learn, games, marketplace, updated_at)
+        values ($1, $2, $3, $4, now())
+        on conflict (subscriber_id) do update
+        set learn = excluded.learn,
+            games = excluded.games,
+            marketplace = excluded.marketplace,
+            updated_at = now()
+      `,
+      [subscriber.id, preferences.learn, preferences.games, preferences.marketplace],
+    );
+  } else {
+    await query(
+      `
+        insert into subscriber_preferences (subscriber_id, learn, games, marketplace, updated_at)
+        values ($1, false, false, false, now())
+        on conflict (subscriber_id) do nothing
+      `,
+      [subscriber.id],
+    );
+  }
+
+  if (projectInterests?.length) {
+    await query(
+      `
+        insert into subscriber_project_interests (
+          subscriber_id,
+          project_slug,
+          source,
+          updated_at
+        )
+        select $1, project_slug, $3, now()
+        from unnest($2::text[]) as project_slug
+        on conflict (subscriber_id, project_slug) do update
+        set source = coalesce(excluded.source, subscriber_project_interests.source),
+            updated_at = now()
+      `,
+      [subscriber.id, projectInterests, source ?? null],
+    );
+  }
 
   return {
     id: subscriber.id,

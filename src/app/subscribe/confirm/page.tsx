@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AutoConfirmSubscriptionForm } from "@/components/auto-confirm-subscription-form";
 import { SubscribeResultAnalytics } from "@/components/subscribe-confirmation-analytics";
-import { Button } from "@/components/ui/button";
 import { analyticsEvents } from "@/lib/analytics";
 import { confirmSubscriber } from "@/lib/subscribe/repository";
 
@@ -15,7 +15,7 @@ type ConfirmPageProps = {
   }>;
 };
 
-async function confirmSubscribeAction(formData: FormData) {
+async function confirmAction(formData: FormData) {
   "use server";
 
   const token = formData.get("token");
@@ -27,12 +27,14 @@ async function confirmSubscribeAction(formData: FormData) {
 
 export default async function ConfirmSubscribePage({ searchParams }: ConfirmPageProps) {
   const { token, result } = await searchParams;
-  const confirmed = result === "success";
-  const failed = result === "error";
+  const explicitResult = result === "success" || result === "error" ? result : undefined;
+  const isAwaitingConfirmation = !explicitResult && Boolean(token);
+  const confirmed = explicitResult === "success";
+  const failed = explicitResult === "error" || !isAwaitingConfirmation;
 
   return (
     <section className="bg-scroll-100 py-20 md:py-28">
-      {result ? (
+      {explicitResult ? (
         <SubscribeResultAnalytics
           eventName={analyticsEvents.subscribeConfirm}
           result={confirmed ? "success" : "error"}
@@ -45,25 +47,25 @@ export default async function ConfirmSubscribePage({ searchParams }: ConfirmPage
             ? "You are confirmed."
             : failed
               ? "Confirmation link expired."
-              : "Confirm your email."}
+              : "Checking your confirmation link."}
         </h1>
         <p className="type-body-lg mt-5 text-moloch-800/75">
           {confirmed
             ? "Thanks for confirming. You are subscribed to RaidGuild Forge updates."
             : failed
               ? "This confirmation link is invalid or no longer active. You can request a fresh one from the homepage."
-              : "Click the button below to finish subscribing to RaidGuild Forge updates."}
+              : "One moment while we confirm your subscription."}
         </p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          {!result && token ? (
-            <form action={confirmSubscribeAction}>
-              <input type="hidden" name="token" value={token} />
-              <Button type="submit">Confirm email</Button>
-            </form>
-          ) : null}
-          <Button asChild>
-            <Link href="/">Return home</Link>
-          </Button>
+        {isAwaitingConfirmation && token ? (
+          <AutoConfirmSubscriptionForm action={confirmAction} token={token} />
+        ) : null}
+        <div className="mt-8">
+          <Link
+            className="type-label-sm inline-flex text-moloch-500 transition hover:text-moloch-800"
+            href="/"
+          >
+            Return home
+          </Link>
         </div>
       </div>
     </section>
