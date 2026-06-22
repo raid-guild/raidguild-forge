@@ -3,6 +3,14 @@ import sgMail from "@sendgrid/mail";
 const defaultFromEmail = "no-reply@raidguild.org";
 const defaultFromName = "RaidGuild Forge";
 
+export const confirmationEmailContexts = {
+  default: "default",
+  titanRacers: "titan-racers",
+} as const;
+
+export type ConfirmationEmailContext =
+  (typeof confirmationEmailContexts)[keyof typeof confirmationEmailContexts];
+
 type ConfirmationEmailCopy = {
   confirmText: string;
   subject: string;
@@ -35,30 +43,33 @@ export function escapeHtml(value: string) {
   });
 }
 
-function getConfirmationEmailCopy(context: string): ConfirmationEmailCopy {
-  if (context === "Titan Racers updates") {
-    return {
-      confirmText:
-        "Confirm that you want Titan Racers development updates and first playable demo news.",
-      subject: "Confirm your Titan Racers updates",
-    };
+function getConfirmationEmailCopy(
+  context: ConfirmationEmailContext,
+): ConfirmationEmailCopy {
+  switch (context) {
+    case confirmationEmailContexts.titanRacers:
+      return {
+        confirmText:
+          "Confirm that you want Titan Racers development updates and first playable demo news.",
+        subject: "Confirm your Titan Racers updates",
+      };
+    case confirmationEmailContexts.default:
+      return {
+        confirmText: "Confirm that you want updates from RaidGuild Forge.",
+        subject: "Confirm your RaidGuild Forge updates",
+      };
   }
-
-  return {
-    confirmText: "Confirm that you want updates from RaidGuild Forge.",
-    subject: "Confirm your RaidGuild Forge updates",
-  };
 }
 
 export async function sendConfirmationEmail({
   to,
   confirmationUrl,
-  context = "RaidGuild Forge updates",
+  context = confirmationEmailContexts.default,
   unsubscribeUrl,
 }: {
   to: string;
   confirmationUrl: string;
-  context?: string;
+  context?: ConfirmationEmailContext;
   unsubscribeUrl: string;
 }) {
   const apiKey = process.env.SENDGRID_API_KEY;

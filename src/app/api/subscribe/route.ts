@@ -2,6 +2,8 @@ import { after, NextResponse, type NextRequest } from "next/server";
 
 import { createConfirmationToken } from "@/lib/subscribe/crypto";
 import {
+  confirmationEmailContexts,
+  type ConfirmationEmailContext,
   escapeHtml,
   sendAdminNotification,
   sendConfirmationEmail,
@@ -142,12 +144,14 @@ function parseProjectInterests(input: unknown) {
   return [...projectInterests];
 }
 
-function getConfirmationEmailContext(projectInterests: string[]) {
+function getConfirmationEmailContext(
+  projectInterests: string[],
+): ConfirmationEmailContext {
   if (projectInterests.includes("titan-racers")) {
-    return "Titan Racers updates";
+    return confirmationEmailContexts.titanRacers;
   }
 
-  return "RaidGuild Forge updates";
+  return confirmationEmailContexts.default;
 }
 
 function parsePreferences(input: unknown) {
