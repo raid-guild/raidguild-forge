@@ -2,6 +2,8 @@ import { after, NextResponse, type NextRequest } from "next/server";
 
 import { createConfirmationToken } from "@/lib/subscribe/crypto";
 import {
+  confirmationEmailContexts,
+  type ConfirmationEmailContext,
   escapeHtml,
   sendAdminNotification,
   sendConfirmationEmail,
@@ -142,6 +144,16 @@ function parseProjectInterests(input: unknown) {
   return [...projectInterests];
 }
 
+function getConfirmationEmailContext(
+  projectInterests: string[],
+): ConfirmationEmailContext {
+  if (projectInterests.includes("titan-racers")) {
+    return confirmationEmailContexts.titanRacers;
+  }
+
+  return confirmationEmailContexts.default;
+}
+
 function parsePreferences(input: unknown) {
   if (input === undefined) {
     return normalizePreferences(undefined);
@@ -275,6 +287,7 @@ export async function POST(request: NextRequest) {
     await sendConfirmationEmail({
       to: subscriber.email,
       confirmationUrl: confirmationUrl.toString(),
+      context: getConfirmationEmailContext(projectInterests),
       unsubscribeUrl: unsubscribeUrl.toString(),
     });
 
