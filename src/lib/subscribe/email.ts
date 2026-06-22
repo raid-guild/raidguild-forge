@@ -3,6 +3,11 @@ import sgMail from "@sendgrid/mail";
 const defaultFromEmail = "no-reply@raidguild.org";
 const defaultFromName = "RaidGuild Forge";
 
+type ConfirmationEmailCopy = {
+  confirmText: string;
+  subject: string;
+};
+
 function getRequiredEnv(name: string) {
   const value = process.env[name];
 
@@ -30,13 +35,30 @@ export function escapeHtml(value: string) {
   });
 }
 
+function getConfirmationEmailCopy(context: string): ConfirmationEmailCopy {
+  if (context === "Titan Racers updates") {
+    return {
+      confirmText:
+        "Confirm that you want Titan Racers development updates and first playable demo news.",
+      subject: "Confirm your Titan Racers updates",
+    };
+  }
+
+  return {
+    confirmText: "Confirm that you want updates from RaidGuild Forge.",
+    subject: "Confirm your RaidGuild Forge updates",
+  };
+}
+
 export async function sendConfirmationEmail({
   to,
   confirmationUrl,
+  context = "RaidGuild Forge updates",
   unsubscribeUrl,
 }: {
   to: string;
   confirmationUrl: string;
+  context?: string;
   unsubscribeUrl: string;
 }) {
   const apiKey = process.env.SENDGRID_API_KEY;
@@ -50,6 +72,8 @@ export async function sendConfirmationEmail({
 
   const fromEmail = process.env.SENDGRID_FROM_EMAIL ?? defaultFromEmail;
   const fromName = process.env.SENDGRID_FROM_NAME ?? defaultFromName;
+  const copy = getConfirmationEmailCopy(context);
+  const escapedConfirmText = escapeHtml(copy.confirmText);
   const escapedConfirmationUrl = escapeHtml(confirmationUrl);
   const escapedUnsubscribeUrl = escapeHtml(unsubscribeUrl);
 
@@ -59,9 +83,9 @@ export async function sendConfirmationEmail({
       email: fromEmail,
       name: fromName,
     },
-    subject: "Confirm your RaidGuild Forge updates",
+    subject: copy.subject,
     text: [
-      "Confirm that you want updates from RaidGuild Forge.",
+      copy.confirmText,
       "",
       confirmationUrl,
       "",
@@ -71,7 +95,7 @@ export async function sendConfirmationEmail({
       "If you did not request this, you can ignore this email.",
     ].join("\n"),
     html: `
-      <p>Confirm that you want updates from RaidGuild Forge.</p>
+      <p>${escapedConfirmText}</p>
       <p><a href="${escapedConfirmationUrl}">Confirm your email</a></p>
       <p>You can <a href="${escapedUnsubscribeUrl}">unsubscribe at any time</a>.</p>
       <p>If you did not request this, you can ignore this email.</p>

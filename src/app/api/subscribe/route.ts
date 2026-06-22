@@ -142,6 +142,14 @@ function parseProjectInterests(input: unknown) {
   return [...projectInterests];
 }
 
+function getConfirmationEmailContext(projectInterests: string[]) {
+  if (projectInterests.includes("titan-racers")) {
+    return "Titan Racers updates";
+  }
+
+  return "RaidGuild Forge updates";
+}
+
 function parsePreferences(input: unknown) {
   if (input === undefined) {
     return normalizePreferences(undefined);
@@ -275,6 +283,7 @@ export async function POST(request: NextRequest) {
     await sendConfirmationEmail({
       to: subscriber.email,
       confirmationUrl: confirmationUrl.toString(),
+      context: getConfirmationEmailContext(projectInterests),
       unsubscribeUrl: unsubscribeUrl.toString(),
     });
 

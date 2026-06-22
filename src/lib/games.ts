@@ -28,21 +28,23 @@ export const gameProjects: GameProject[] = [
   {
     title: "Titan Racers",
     slug: "titan-racers",
-    status: "In concept",
+    status: "In development",
     activity: "active",
-    timeframe: "Concept in development",
-    firstRelease: "Concept phase",
+    timeframe: "First playable demo targeted for Q3 2026",
+    firstRelease: "In development",
     latestUpdate: "Current focus",
     summary:
-      "A creator-first sci-fi racing game for real-world-compatible mini karts.",
+      "A sci-fi RC kart racing game set inside humanity's last Titan colony.",
     description:
-      "Players assemble machines from physical constraints, then prove handling, durability, and speed inside hidden tracks on a Titan orbital habitat.",
+      "Players build small remotely controlled machines from modular components, race them through habitat-scale courses, and turn winning designs into reputation, royalties, and eventually real-world kits.",
     image: "/assets/projects/forge-hero-workbench.png",
-    primaryCta: "Follow development",
+    href: "https://titanracers.com/",
+    primaryCta: "Visit Titan Racers",
+    externalLabel: "Project site",
     notes: [
-      "Grounded in real machine design",
-      "Built around Engineer, Assembler, and Player roles",
-      "Intended for physics-first digital and physical prototyping",
+      "First playable demo is in development",
+      "Built around Engineer, Assembler, and Racer roles",
+      "Designed for digital racing and future physical kit experiments",
     ],
   },
   {
