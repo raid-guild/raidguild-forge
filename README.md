@@ -1,41 +1,26 @@
 # RaidGuild Forge
 
-Website for RaidGuild Forge.
+RaidGuild Forge closed in November 2026. This repo now deploys a redirect-only
+site to forge.raidguild.org; the full site is in the git history.
 
-## Local Development
+- `/subscribe/unsubscribe` → `https://titanracers.com/updates/unsubscribe`,
+  keeping the `token` query. Forge's newsletter list moved to the Titan Racers
+  updates list with each subscriber's unsubscribe token, so links in old Forge
+  emails still work.
+- Other `/subscribe/*` paths → `https://titanracers.com`.
+- Everything else → `https://raidguild.org`.
 
-```bash
-pnpm install
-pnpm dev
-```
+The redirects are in `next.config.ts`. The deploy needs no environment
+variables.
 
-For the subscribe flow, copy `.env.example` to `.env` and set `DATABASE_URL`.
-The same variable can point to local Postgres in development or Neon in
-production. Run the migration with:
+## Local check
 
-```bash
-pnpm db:migrate
-```
-
-Vercel runs `pnpm db:migrate && pnpm build` during production deployment.
-The migration runner skips Vercel preview builds and uses a Postgres advisory
-lock so concurrent production builds do not apply migrations at the same time.
-The migration runner records applied filenames and checksums in
-`schema_migrations`, so each migration file runs once per database.
-
-To reset the local subscribe tables and rerun the migration:
+The lockfile is pnpm 9's, so run pnpm 9 (newer pnpm stops on ignored build
+scripts):
 
 ```bash
-pnpm db:reset
+corepack pnpm@9.15.9 install
+corepack pnpm@9.15.9 build
+corepack pnpm@9.15.9 start
+curl -sI "http://localhost:3000/subscribe/unsubscribe?token=abc"
 ```
-
-The reset script only runs against `localhost`, `127.0.0.1`, or `::1` database
-hosts unless `FORCE_DB_RESET=true` is set.
-
-SendGrid confirmation and admin notification emails use `SENDGRID_API_KEY`,
-`SENDGRID_FROM_EMAIL`, and `SENDGRID_FROM_NAME`. Set `ADMIN_NOTIFY_EMAIL` to
-receive best-effort owner notifications for new update subscriptions and
-successful marketplace kit purchases. Confirmation links use `SITE_URL`, then
-fall back to the Vercel deployment URL or request origin. Set
-`SITE_URL=https://forge.raidguild.org` in production so emails, metadata, robots,
-and sitemap URLs all use the canonical site.
